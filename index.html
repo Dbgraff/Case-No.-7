@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Дело № 7 · Штаб</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Neucha&family=Oranienbaum&family=PT+Mono&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="chev">81</div>
+          <div>
+            <h1>Штаб · Дело № 7</h1>
+            <p class="sub">ВТСО «Запад-81» · лагерь «Ракета»</p>
+          </div>
+        </div>
+        <div class="resources">
+          <div class="res"><span>День</span><b id="day">1</b></div>
+          <div class="res"><span>До заката</span><b id="hours">5 ч</b></div>
+        </div>
+      </header>
+
+      <div class="goalbar">
+        <span class="label">Цель 1 из 3</span>
+        <span id="goalText">Где жила «Искра»?</span>
+      </div>
+
+      <nav class="tabs" id="tabs">
+        <button type="button" data-tab="hq" class="on">Связь</button>
+        <button type="button" data-tab="archive">Архив</button>
+        <button type="button" data-tab="finds">Находки</button>
+        <button type="button" data-tab="case">Дело</button>
+      </nav>
+
+      <main class="workspace">
+        <!-- HQ: radio + Pixi map -->
+        <section class="pane on" data-pane="hq">
+          <div class="hq-grid">
+            <div class="radio">
+              <div class="label">Рация группы</div>
+              <div class="chat" id="chat"></div>
+            </div>
+            <div class="map-wrap">
+              <div class="label">Карта лагеря · видеосвязь</div>
+              <div id="pixi-host"></div>
+              <div class="map-actions">
+                <button type="button" id="btnSend" class="btn" disabled>Отправить группу · 1 ч</button>
+                <span id="placeLabel" class="muted">место не выбрано</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Archive placeholder -->
+        <section class="pane" data-pane="archive" hidden>
+          <div class="placeholder">
+            <h2>Архив клуба</h2>
+            <p>Поиск по документам, выписывание примет — следующий шаг.</p>
+          </div>
+        </section>
+
+        <section class="pane" data-pane="finds" hidden>
+          <div class="placeholder">
+            <h2>Находки</h2>
+            <p>Письмо, кассета, шифр — появятся после выходов группы.</p>
+          </div>
+        </section>
+
+        <section class="pane" data-pane="case" hidden>
+          <div class="placeholder">
+            <h2>Дело № 7</h2>
+            <p>Доска «Кто / Когда / Где / Вывод» и отчёты командиру.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

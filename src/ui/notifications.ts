@@ -1,4 +1,5 @@
 import { say, type ChatKind } from "./chat";
+import { getActiveSpace, onSpaceChange, showSpace } from "./spaces";
 import { getActiveTab, onTabChange, showTab } from "./tabs";
 
 /** Id of the tab that contains the chat. */
@@ -34,12 +35,22 @@ export function initNotifications(): void {
   toastsEl.className = "toasts";
   document.body.appendChild(toastsEl);
 
-  onTabChange((tab) => {
-    if (tab === CHAT_TAB) {
+  const resetIfChatVisible = (): void => {
+    if (isChatVisible()) {
       unread = 0;
       renderBadge();
     }
-  });
+  };
+  onTabChange(resetIfChatVisible);
+  onSpaceChange(resetIfChatVisible);
+}
+
+/**
+ * Tells whether the chat is on screen right now (computer space, chat tab).
+ * @returns {boolean} `true` if the player can see the chat.
+ */
+function isChatVisible(): boolean {
+  return getActiveSpace() === "computer" && getActiveTab() === CHAT_TAB;
 }
 
 /**
@@ -109,6 +120,7 @@ function showToast(who: string, text: string, kind: ChatKind): void {
     remove();
   });
   toast.addEventListener("click", () => {
+    showSpace("computer");
     showTab(CHAT_TAB);
     remove();
   });
@@ -120,7 +132,7 @@ function showToast(who: string, text: string, kind: ChatKind): void {
 
 /**
  * Delivers a game message to the player. It always goes into the chat. If the
- * chat tab is not open, the message also shows a pop-up in the bottom-right
+ * chat is not on screen, the message also shows a pop-up in the bottom-right
  * corner and increases the unread badge on the chat tab.
  * @param {string} who - Sender name.
  * @param {string} text - Message text.
@@ -129,7 +141,7 @@ function showToast(who: string, text: string, kind: ChatKind): void {
  */
 export function notify(who: string, text: string, kind: ChatKind = ""): void {
   say(who, text, kind);
-  if (getActiveTab() === CHAT_TAB) return;
+  if (isChatVisible()) return;
   unread++;
   renderBadge();
   showToast(who, text, kind);

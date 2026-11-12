@@ -7,7 +7,19 @@ import { PLACES } from "../map/places";
 import { subscribe, type GameState } from "../state";
 
 /**
- * Creates a "label: value" row for a find card.
+ * Returns a small stable tilt (in degrees) for a find, so that items lie on
+ * the table slightly crooked but keep the same angle between renders.
+ * @param {string} id - Find id.
+ * @returns {number} Angle in degrees, from -2.5 to 2.4.
+ */
+function tilt(id: string): number {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  return ((Math.abs(h) % 50) - 25) / 10;
+}
+
+/**
+ * Creates a "label: value" row for the inspection panel.
  * @param {string} label - Row label.
  * @param {string} value - Row value (plain text).
  * @returns {HTMLElement} Row element.
@@ -23,68 +35,123 @@ function metaRow(label: string, value: string): HTMLElement {
 }
 
 /**
- * Builds the card of one find, including its origin.
+ * Builds a physical item lying on the table.
  * @param {Find} f - Find to display.
- * @returns {HTMLElement} Card element.
+ * @param {boolean} isSelected - Whether the item is currently being inspected.
+ * @param {() => void} onClick - Called when the player clicks the item.
+ * @returns {HTMLElement} Item element.
  */
-function renderCard(f: Find): HTMLElement {
-  const card = document.createElement("article");
-  card.className = "find-card";
+function renderItem(f: Find, isSelected: boolean, onClick: () => void): HTMLElement {
+  const item = document.createElement("button");
+  item.type = "button";
+  item.className = `desk-item type-${f.type}` + (isSelected ? " sel" : "");
+  item.style.setProperty("--tilt", `${tilt(f.id)}deg`);
 
-  const head = document.createElement("div");
-  head.className = "find-head";
-  const title = document.createElement("h3");
+  const title = document.createElement("span");
+  title.className = "desk-item-title";
   title.textContent = f.title;
-  const tag = document.createElement("span");
-  tag.className = "find-tag";
-  tag.textContent = `${FIND_TYPE_LABELS[f.type]} · ${FIND_STATUS_LABELS[f.status]}`;
-  head.appendChild(title);
-  head.appendChild(tag);
-  card.appendChild(head);
+  item.appendChild(title);
 
-  const desc = document.createElement("p");
-  desc.textContent = f.description;
-  card.appendChild(desc);
+  const kind = document.createElement("span");
+  kind.className = "desk-item-kind";
+  kind.textContent = FIND_TYPE_LABELS[f.type];
+  item.appendChild(kind);
 
-  const place = PLACES.find((p) => p.id === f.placeId)?.name ?? f.placeId;
-  card.appendChild(metaRow("Кто нашёл: ", f.foundBy));
-  card.appendChild(metaRow("Где: ", place));
-  card.appendChild(metaRow("Когда: ", `день ${f.day}`));
-  card.appendChild(metaRow("Обстоятельства: ", f.circumstances));
-  return card;
+  if (f.status === "new") {
+    const mark = document.createElement("span");
+    mark.className = "desk-new";
+    mark.textContent = "новое";
+    item.appendChild(mark);
+  }
+
+  item.addEventListener("click", onClick);
+  return item;
 }
 
 /**
- * Keeps the "Находки" tab in sync with the game state: shows an empty-state
- * message or the list of find cards (newest first).
+ * Fills the inspection panel with the selected find (with its origin) or
+ * with a hint if nothing is selected.
+ * @param {HTMLElement} host - Panel element.
+ * @param {Find | undefined} f - Selected find.
+ * @returns {void}
+ */
+function renderInspect(host: HTMLElement, f: Find | undefined): void {
+  host.replaceChildren();
+  if (!f) {
+    const hint = document.createElement("p");
+    hint.className = "muted";
+    hint.textContent = "Выберите предмет на столе, чтобы осмотреть его.";
+    host.appendChild(hint);
+    return;
+  }
+
+  const title = document.createElement("h3");
+  title.textContent = f.title;
+  host.appendChild(title);
+
+  const tag = document.createElement("div");
+  tag.className = "find-tag";
+  tag.textContent = `${FIND_TYPE_LABELS[f.type]} · ${FIND_STATUS_LABELS[f.status]}`;
+  host.appendChild(tag);
+
+  const desc = document.createElement("p");
+  desc.textContent = f.description;
+  host.appendChild(desc);
+
+  const place = PLACES.find((p) => p.id === f.placeId)?.name ?? f.placeId;
+  host.appendChild(metaRow("Кто нашёл: ", f.foundBy));
+  host.appendChild(metaRow("Где: ", place));
+  host.appendChild(metaRow("Когда: ", `день ${f.day}`));
+  host.appendChild(metaRow("Обстоятельства: ", f.circumstances));
+
+  const tools = document.createElement("div");
+  tools.className = "desk-tools";
+  tools.textContent = "Здесь появятся инструменты реставрации.";
+  host.appendChild(tools);
+}
+
+/**
+ * Keeps the restoration table in sync with the game state: every find lies
+ * on the table as a physical item; clicking an item opens its description
+ * and origin below.
  * @returns {void}
  */
 export function bindFinds(): void {
-  const host = document.getElementById("findsList")!;
-  let renderedCount = -1;
+  const surface = document.getElementById("deskItems")!;
+  const inspect = document.getElementById("deskInspect")!;
+  let selectedId: string | null = null;
+  let lastState: Readonly<GameState> | null = null;
 
-  /** @param {GameState} s - Current game state. */
-  const render = (s: Readonly<GameState>): void => {
-    if (s.finds.length === renderedCount) return;
-    renderedCount = s.finds.length;
-    host.replaceChildren();
+  /**
+   * Redraws the items and the inspection panel.
+   * @returns {void}
+   */
+  const render = (): void => {
+    if (!lastState) return;
+    const finds = lastState.finds;
+    surface.replaceChildren();
 
-    if (s.finds.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "placeholder";
-      const h = document.createElement("h2");
-      h.textContent = "Находки";
-      const p = document.createElement("p");
-      p.textContent =
-        "Пока пусто. Отправьте группу на выход и завершите день — находки появятся здесь.";
-      empty.appendChild(h);
-      empty.appendChild(p);
-      host.appendChild(empty);
-      return;
+    if (finds.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "desk-empty";
+      empty.textContent =
+        "Стол пуст. Отправьте группу на выход и завершите день — находки появятся здесь.";
+      surface.appendChild(empty);
     }
 
-    for (const f of [...s.finds].reverse()) host.appendChild(renderCard(f));
+    for (const f of finds) {
+      surface.appendChild(
+        renderItem(f, f.id === selectedId, () => {
+          selectedId = f.id;
+          render();
+        }),
+      );
+    }
+    renderInspect(inspect, finds.find((f) => f.id === selectedId));
   };
 
-  subscribe(render);
+  subscribe((s) => {
+    lastState = s;
+    render();
+  });
 }

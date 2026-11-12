@@ -1,5 +1,6 @@
 import "./style.css";
 import { initNotifications, notify } from "./ui/notifications";
+import { addTableNews, initSpaces } from "./ui/spaces";
 import { initTabs } from "./ui/tabs";
 import { bindFinds } from "./ui/finds";
 import { bindTopbar } from "./ui/topbar";
@@ -139,7 +140,8 @@ function reportDay(report: DayReport): void {
   }
 
   if (foundCount > 0) {
-    notify("Система", "Новые находки — на вкладке «Находки».", "sys");
+    addTableNews(foundCount);
+    notify("Система", "Новые находки — на реставрационном столе.", "sys");
   }
   notify("Система", `Начался день ${report.newDay}. До заката ${HOURS_PER_DAY} ч.`, "sys");
 }
@@ -153,6 +155,7 @@ btnEndDay.addEventListener("click", () => {
 
 /* ===== boot ===== */
 initTabs();
+initSpaces();
 initNotifications();
 bindTopbar();
 bindFinds();

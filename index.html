@@ -27,6 +27,13 @@
         </div>
       </header>
 
+      <nav class="spaces" id="spaces">
+        <button type="button" data-space="computer" class="on">Компьютер</button>
+        <button type="button" data-space="table">Стол реставрации</button>
+      </nav>
+
+      <!-- Space 1: computer -->
+      <div class="space" id="spaceComputer">
       <div class="goalbar">
         <span class="label">Цель 1 из 3</span>
         <span id="goalText">Где жила «Искра»?</span>
@@ -35,7 +42,6 @@
       <nav class="tabs" id="tabs">
         <button type="button" data-tab="hq" class="on">Связь</button>
         <button type="button" data-tab="archive">Архив</button>
-        <button type="button" data-tab="finds">Находки</button>
         <button type="button" data-tab="case">Дело</button>
       </nav>
 
@@ -52,7 +58,7 @@
               <div id="pixi-host"></div>
               <div class="map-actions">
                 <button type="button" id="btnSend" class="btn" disabled>Отправить группу · 1 ч</button>
-                   <button type="button" id="btnEndDay" class="btn ghost">Завершить день</button>
+                <button type="button" id="btnEndDay" class="btn ghost">Завершить день</button>
                 <span id="placeLabel" class="muted">место не выбрано</span>
               </div>
             </div>
@@ -67,10 +73,6 @@
           </div>
         </section>
 
-        <section class="pane" data-pane="finds" hidden>
-          <div class="finds" id="findsList"></div>
-        </section>
-
         <section class="pane" data-pane="case" hidden>
           <div class="placeholder">
             <h2>Дело № 7</h2>
@@ -78,6 +80,16 @@
           </div>
         </section>
       </main>
+      </div>
+
+      <!-- Space 2: physical restoration table -->
+      <section class="space desk" id="spaceTable" hidden>
+        <div class="desk-top">
+          <span class="label">Реставрационный стол</span>
+        </div>
+        <div class="desk-surface" id="deskItems"></div>
+        <div class="desk-inspect" id="deskInspect"></div>
+      </section>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

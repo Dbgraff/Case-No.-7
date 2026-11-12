@@ -52,6 +52,7 @@
               <div id="pixi-host"></div>
               <div class="map-actions">
                 <button type="button" id="btnSend" class="btn" disabled>Отправить группу · 1 ч</button>
+                   <button type="button" id="btnEndDay" class="btn ghost">Завершить день</button>
                 <span id="placeLabel" class="muted">место не выбрано</span>
               </div>
             </div>
@@ -67,10 +68,7 @@
         </section>
 
         <section class="pane" data-pane="finds" hidden>
-          <div class="placeholder">
-            <h2>Находки</h2>
-            <p>Письмо, кассета, шифр — появятся после выходов группы.</p>
-          </div>
+          <div class="finds" id="findsList"></div>
         </section>
 
         <section class="pane" data-pane="case" hidden>

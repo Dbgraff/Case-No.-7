@@ -1,9 +1,12 @@
 import "./style.css";
 import { say } from "./ui/chat";
 import { initTabs } from "./ui/tabs";
+import { bindFinds } from "./ui/finds";
 import { bindTopbar } from "./ui/topbar";
+import { endDay, type DayReport } from "./game/endDay";
 import {
   GROUP_TRIP_COST_HOURS,
+  HOURS_PER_DAY,
   getState,
   subscribe,
   updateState,
@@ -16,6 +19,7 @@ let selected: Place | null = null;
 let campMap: CampMap | null = null;
 
 const btnSend = document.getElementById("btnSend") as HTMLButtonElement;
+const btnEndDay = document.getElementById("btnEndDay") as HTMLButtonElement;
 const placeLabel = document.getElementById("placeLabel")!;
 
 /**
@@ -40,18 +44,63 @@ function selectPlace(p: Place | null): void {
 
 btnSend.addEventListener("click", () => {
   if (!selected || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
-  updateState({ hoursLeft: getState().hoursLeft - GROUP_TRIP_COST_HOURS });
+  const s = getState();
+  updateState({
+    hoursLeft: s.hoursLeft - GROUP_TRIP_COST_HOURS,
+    visits: [...s.visits, selected.id],
+  });
   say("Даша", `Идём к «${selected.name}». Приём.`, "find");
   say("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
   if (getState().hoursLeft === 0) {
-    say("Система", "Солнце село. Выходов на сегодня больше нет.", "sys");
+    say("Система", "Солнце село. Выходов на сегодня больше нет — завершите день.", "sys");
   }
+});
+
+/**
+ * Reports the results of the group's trips in the chat: a find with its
+ * origin, or a message that nothing new was found.
+ * @param {DayReport} report - Report returned by `endDay()`.
+ * @returns {void}
+ */
+function reportDay(report: DayReport): void {
+  say("Система", `День ${report.endedDay} завершён.`, "sys");
+
+  if (report.trips.length === 0) {
+    say("Даша", "Сегодня выходов не было. Ждём новых указаний. Приём.");
+  }
+
+  let foundCount = 0;
+  for (const trip of report.trips) {
+    const place = PLACES.find((p) => p.id === trip.placeId)?.name ?? trip.placeId;
+    if (trip.find) {
+      foundCount++;
+      say(
+        trip.find.foundBy,
+        `«${place}»: нашли «${trip.find.title}». ${trip.find.circumstances} Приём.`,
+        "find",
+      );
+    } else {
+      say("Даша", `«${place}»: ничего нового. Приём.`);
+    }
+  }
+
+  if (foundCount > 0) {
+    say("Система", "Новые находки — на вкладке «Находки».", "sys");
+  }
+  say("Система", `Начался день ${report.newDay}. До заката ${HOURS_PER_DAY} ч.`, "sys");
+}
+
+btnEndDay.addEventListener("click", () => {
+  const report = endDay();
+  selectPlace(null);
+  reportDay(report);
 });
 
 /* ===== boot ===== */
 initTabs();
 bindTopbar();
+bindFinds();
 subscribe(refreshSendButton);
 
 say(

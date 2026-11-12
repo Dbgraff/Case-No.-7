@@ -1,9 +1,15 @@
+import type { Find } from "./finds";
+
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {
   /** Current in-game day, starting at 1. */
   day: number;
   /** Hours left until sunset on the current day. */
   hoursLeft: number;
+  /** Ids of places the group was sent to today (in order, repeats allowed). */
+  visits: string[];
+  /** All finds delivered by the group so far. */
+  finds: Find[];
 };
 
 /** localStorage key. Bump the version suffix when the save format changes. */
@@ -24,7 +30,7 @@ const listeners = new Set<Listener>();
  * @returns {GameState} Initial state.
  */
 function createInitialState(): GameState {
-  return { day: 1, hoursLeft: HOURS_PER_DAY };
+  return { day: 1, hoursLeft: HOURS_PER_DAY, visits: [], finds: [] };
 }
 
 /**
@@ -43,7 +49,12 @@ function loadState(): GameState {
       data.day! >= 1 &&
       data.hoursLeft! >= 0
     ) {
-      return { day: data.day!, hoursLeft: data.hoursLeft! };
+      const visits =
+        Array.isArray(data.visits) && data.visits.every((v) => typeof v === "string")
+          ? data.visits
+          : [];
+      const finds = Array.isArray(data.finds) ? data.finds : [];
+      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds };
     }
   } catch {
     // corrupted save or storage unavailable — start over

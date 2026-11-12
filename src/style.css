@@ -336,3 +336,60 @@ body {
     min-height: 280px;
   }
 }
+
+/* Finds */
+.finds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.finds .placeholder {
+  grid-column: 1 / -1;
+}
+
+.find-card {
+  padding: 12px 14px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.find-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.find-head h3 {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.find-tag {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--thread);
+}
+
+.find-card p {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.find-meta {
+  font-size: 13px;
+}
+
+.find-meta span {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: #6d5b2c;
+}

@@ -14,6 +14,11 @@ export type CampMap = {
    * Does not fire `onSelect`.
    */
   setSelected: (id: string | null) => void;
+  /**
+   * Moves the group marker to the given place.
+   * @param {string} id - Id of the place where the group is.
+   */
+  setGroupPlace: (id: string) => void;
 };
 
 const COLORS = {
@@ -159,6 +164,14 @@ export async function initCampMap(
     gfx.set(p.id, bg);
   }
 
+  // group marker (drawn above the places)
+  const groupMarker = new Graphics();
+  groupMarker.circle(0, 0, 7);
+  groupMarker.fill(COLORS.accent);
+  groupMarker.stroke({ width: 2, color: 0xffffff });
+  groupMarker.visible = false;
+  world.addChild(groupMarker);
+
   // drag-to-pan
   let dragging = false;
   let lastX = 0;
@@ -183,7 +196,7 @@ export async function initCampMap(
   });
 
   const hint = new Text({
-    text: "Тяните карту · клик по зданию — выбор",
+    text: "Тяните карту · клик по зданию — выбор · красная точка — группа",
     style: new TextStyle({
       fontFamily: "PT Mono, monospace",
       fontSize: 11,
@@ -198,6 +211,15 @@ export async function initCampMap(
     setSelected(id) {
       selectedId = id;
       refresh();
+    },
+    setGroupPlace(id) {
+      const p = places.find((pl) => pl.id === id);
+      if (!p) {
+        groupMarker.visible = false;
+        return;
+      }
+      groupMarker.position.set(p.x + p.w - 8, p.y + 8);
+      groupMarker.visible = true;
     },
   };
 }

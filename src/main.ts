@@ -23,6 +23,15 @@ const btnEndDay = document.getElementById("btnEndDay") as HTMLButtonElement;
 const placeLabel = document.getElementById("placeLabel")!;
 
 /**
+ * Returns the display name of a place by its id.
+ * @param {string} id - Place id.
+ * @returns {string} Place name (or the id if the place is unknown).
+ */
+function placeName(id: string): string {
+  return PLACES.find((p) => p.id === id)?.name ?? id;
+}
+
+/**
  * Enables "send group" only when a place is chosen and there is enough time.
  * @returns {void}
  */
@@ -48,7 +57,9 @@ btnSend.addEventListener("click", () => {
   updateState({
     hoursLeft: s.hoursLeft - GROUP_TRIP_COST_HOURS,
     visits: [...s.visits, selected.id],
+    groupPlaceId: selected.id,
   });
+  campMap?.setGroupPlace(selected.id);
   say("Даша", `Идём к «${selected.name}». Приём.`, "find");
   say("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
@@ -72,7 +83,7 @@ function reportDay(report: DayReport): void {
 
   let foundCount = 0;
   for (const trip of report.trips) {
-    const place = PLACES.find((p) => p.id === trip.placeId)?.name ?? trip.placeId;
+    const place = placeName(trip.placeId);
     if (trip.find) {
       foundCount++;
       say(
@@ -114,12 +125,18 @@ say(
 
 initCampMap(document.getElementById("pixi-host")!, PLACES, {
   onSelect: (p) => {
+    if (p.id === getState().groupPlaceId) {
+      selectPlace(null);
+      say("Штаб", `Группа уже находится у «${p.name}». Выберите другое место.`);
+      return;
+    }
     selectPlace(p);
     say("Штаб", `Отметили на карте: ${p.name}.`);
   },
 })
   .then((map) => {
     campMap = map;
+    map.setGroupPlace(getState().groupPlaceId);
   })
   .catch((err) => {
     console.error(err);

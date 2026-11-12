@@ -10,10 +10,15 @@ export type GameState = {
   visits: string[];
   /** All finds delivered by the group so far. */
   finds: Find[];
+  /** Id of the place where the group is right now. */
+  groupPlaceId: string;
 };
 
 /** localStorage key. Bump the version suffix when the save format changes. */
 const STORAGE_KEY = "case7:save:v1";
+
+/** Place where the group starts the game. */
+export const START_PLACE_ID = "gate";
 
 /** Hours available at the start of each day. */
 export const HOURS_PER_DAY = 5;
@@ -30,7 +35,7 @@ const listeners = new Set<Listener>();
  * @returns {GameState} Initial state.
  */
 function createInitialState(): GameState {
-  return { day: 1, hoursLeft: HOURS_PER_DAY, visits: [], finds: [] };
+  return { day: 1, hoursLeft: HOURS_PER_DAY, visits: [], finds: [], groupPlaceId: START_PLACE_ID };
 }
 
 /**
@@ -54,7 +59,9 @@ function loadState(): GameState {
           ? data.visits
           : [];
       const finds = Array.isArray(data.finds) ? data.finds : [];
-      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds };
+      const groupPlaceId =
+        typeof data.groupPlaceId === "string" ? data.groupPlaceId : START_PLACE_ID;
+      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds, groupPlaceId };
     }
   } catch {
     // corrupted save or storage unavailable — start over

@@ -1,5 +1,5 @@
 import "./style.css";
-import { say } from "./ui/chat";
+import { initNotifications, notify } from "./ui/notifications";
 import { initTabs } from "./ui/tabs";
 import { bindFinds } from "./ui/finds";
 import { bindTopbar } from "./ui/topbar";
@@ -51,21 +51,63 @@ function selectPlace(p: Place | null): void {
   campMap?.setSelected(p ? p.id : null);
 }
 
+/** Delay before the group reports its arrival at a place, ms. */
+const ARRIVAL_DELAY_MS = 4000;
+
+/** A group arrival report that has been scheduled but not yet delivered. */
+type PendingArrival = { timer: number; deliver: () => void };
+
+const pendingArrivals = new Set<PendingArrival>();
+
+/**
+ * Schedules the group's arrival message. After the last pending arrival of a
+ * day with no hours left, a "sunset" system notification follows.
+ * @param {string} name - Name of the place the group is heading to.
+ * @returns {void}
+ */
+function scheduleArrival(name: string): void {
+  const arrival: PendingArrival = { timer: 0, deliver: () => {} };
+  arrival.deliver = () => {
+    pendingArrivals.delete(arrival);
+    notify("Даша", `Прибыли к «${name}». Приём.`);
+    if (pendingArrivals.size === 0 && getState().hoursLeft === 0) {
+      notify(
+        "Система",
+        "Солнце село. Выходов на сегодня больше нет — завершите день.",
+        "sys",
+      );
+    }
+  };
+  arrival.timer = window.setTimeout(arrival.deliver, ARRIVAL_DELAY_MS);
+  pendingArrivals.add(arrival);
+}
+
+/**
+ * Delivers all scheduled arrival messages immediately (used before the day
+ * ends, so reports keep their order).
+ * @returns {void}
+ */
+function flushArrivals(): void {
+  for (const a of [...pendingArrivals]) {
+    window.clearTimeout(a.timer);
+    a.deliver();
+  }
+}
+
 btnSend.addEventListener("click", () => {
   if (!selected || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
   const s = getState();
+  const target = selected;
   updateState({
     hoursLeft: s.hoursLeft - GROUP_TRIP_COST_HOURS,
-    visits: [...s.visits, selected.id],
-    groupPlaceId: selected.id,
+    visits: [...s.visits, target.id],
+    groupPlaceId: target.id,
   });
-  campMap?.setGroupPlace(selected.id);
-  say("Даша", `Идём к «${selected.name}». Приём.`, "find");
-  say("Артём", "Приняли. Выдвигаемся.");
+  campMap?.setGroupPlace(target.id);
+  notify("Даша", `Идём к «${target.name}». Приём.`);
+  notify("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
-  if (getState().hoursLeft === 0) {
-    say("Система", "Солнце село. Выходов на сегодня больше нет — завершите день.", "sys");
-  }
+  scheduleArrival(target.name);
 });
 
 /**
@@ -75,10 +117,10 @@ btnSend.addEventListener("click", () => {
  * @returns {void}
  */
 function reportDay(report: DayReport): void {
-  say("Система", `День ${report.endedDay} завершён.`, "sys");
+  notify("Система", `День ${report.endedDay} завершён.`, "sys");
 
   if (report.trips.length === 0) {
-    say("Даша", "Сегодня выходов не было. Ждём новых указаний. Приём.");
+    notify("Даша", "Сегодня выходов не было. Ждём новых указаний. Приём.");
   }
 
   let foundCount = 0;
@@ -86,23 +128,24 @@ function reportDay(report: DayReport): void {
     const place = placeName(trip.placeId);
     if (trip.find) {
       foundCount++;
-      say(
+      notify(
         trip.find.foundBy,
         `«${place}»: нашли «${trip.find.title}». ${trip.find.circumstances} Приём.`,
-        "find",
+        "story",
       );
     } else {
-      say("Даша", `«${place}»: ничего нового. Приём.`);
+      notify("Даша", `«${place}»: ничего нового. Приём.`);
     }
   }
 
   if (foundCount > 0) {
-    say("Система", "Новые находки — на вкладке «Находки».", "sys");
+    notify("Система", "Новые находки — на вкладке «Находки».", "sys");
   }
-  say("Система", `Начался день ${report.newDay}. До заката ${HOURS_PER_DAY} ч.`, "sys");
+  notify("Система", `Начался день ${report.newDay}. До заката ${HOURS_PER_DAY} ч.`, "sys");
 }
 
 btnEndDay.addEventListener("click", () => {
+  flushArrivals();
   const report = endDay();
   selectPlace(null);
   reportDay(report);
@@ -110,15 +153,16 @@ btnEndDay.addEventListener("click", () => {
 
 /* ===== boot ===== */
 initTabs();
+initNotifications();
 bindTopbar();
 bindFinds();
 subscribe(refreshSendButton);
 
-say(
+notify(
   "Даша",
   "Штаб, мы у ворот «Ракеты». До заката пять часов. Корпуса 1, 2 и 4 — третьего нет. Где жила «Искра»?",
 );
-say(
+notify(
   "Командир",
   "Поиск по архиву бесплатный. Выходы группы стоят времени. Сначала разберитесь в документах, потом отправляйте ребят.",
 );
@@ -127,11 +171,11 @@ initCampMap(document.getElementById("pixi-host")!, PLACES, {
   onSelect: (p) => {
     if (p.id === getState().groupPlaceId) {
       selectPlace(null);
-      say("Штаб", `Группа уже находится у «${p.name}». Выберите другое место.`);
+      notify("Штаб", `Группа уже находится у «${p.name}». Выберите другое место.`);
       return;
     }
     selectPlace(p);
-    say("Штаб", `Отметили на карте: ${p.name}.`);
+    notify("Штаб", `Отметили на карте: ${p.name}.`);
   },
 })
   .then((map) => {
@@ -140,6 +184,6 @@ initCampMap(document.getElementById("pixi-host")!, PLACES, {
   })
   .catch((err) => {
     console.error(err);
-    say("Система", "Не удалось запустить карту (Pixi). Проверьте консоль.", "sys");
+    notify("Система", "Не удалось запустить карту (Pixi). Проверьте консоль.", "sys");
   });
   

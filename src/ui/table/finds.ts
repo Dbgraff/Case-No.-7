@@ -3,8 +3,11 @@ import {
   FIND_TYPE_LABELS,
   type Find,
 } from "../finds";
+import { RESTORATIONS } from "../data/finds";
 import { PLACES } from "../map/places";
-import { subscribe, type GameState } from "../state";
+import { subscribe, updateFindStatus, type GameState } from "../state";
+import { notify } from "./notifications";
+import { openRestoration } from "./restore";
 
 /**
  * Returns a small stable tilt (in degrees) for a find, so that items lie on
@@ -104,10 +107,43 @@ function renderInspect(host: HTMLElement, f: Find | undefined): void {
   host.appendChild(metaRow("Когда: ", `день ${f.day}`));
   host.appendChild(metaRow("Обстоятельства: ", f.circumstances));
 
-  const tools = document.createElement("div");
-  tools.className = "desk-tools";
-  tools.textContent = "Здесь появятся инструменты реставрации.";
-  host.appendChild(tools);
+  const restoration = RESTORATIONS[f.id];
+  if (!restoration) {
+    const tools = document.createElement("div");
+    tools.className = "desk-tools";
+    tools.textContent = "Для этого предмета реставрация пока не подготовлена.";
+    host.appendChild(tools);
+    return;
+  }
+
+  if (f.status === "done") {
+    const result = document.createElement("div");
+    result.className = "desk-result";
+    const h = document.createElement("b");
+    h.textContent = restoration.result.title;
+    const t = document.createElement("p");
+    t.textContent = restoration.result.text;
+    result.append(h, t);
+    host.appendChild(result);
+    return;
+  }
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn";
+  btn.textContent = f.status === "inProgress" ? "Продолжить реставрацию" : "Начать реставрацию";
+  btn.addEventListener("click", () => {
+    if (f.status === "new") updateFindStatus(f.id, "inProgress");
+    openRestoration(f, restoration, () => {
+      updateFindStatus(f.id, "done");
+      notify(
+        "Система",
+        `Реставрация завершена: «${f.title}». ${restoration.result.title}.`,
+        "story",
+      );
+    });
+  });
+  host.appendChild(btn);
 }
 
 /**

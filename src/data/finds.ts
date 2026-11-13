@@ -1,4 +1,4 @@
-import type { FindTemplate } from "../finds";
+import type { FindTemplate, Restoration } from "../finds";
 
 /**
  * ЗАГЛУШКИ для проверки механики. Настоящие улики, их происхождение и связи
@@ -39,3 +39,26 @@ export const FIND_TEMPLATES: FindTemplate[] = [
     related: [],
   },
 ];
+
+/**
+ * Restoration tasks by find id. A find without an entry cannot be restored yet.
+ * ЗАГЛУШКИ: тексты результатов пишет сюжетный разработчик.
+ */
+export const RESTORATIONS: Record<string, Restoration> = {
+  "find-wrapper": {
+    kind: "mold",
+    spots: 3,
+    result: {
+      title: "Надпись на обороте",
+      text: "Карандашом, неровным почерком: «Текст-заглушка. Сюда сюжетный разработчик впишет первую зацепку».",
+    },
+  },
+  "find-damaged-sheet": {
+    kind: "mold",
+    spots: 6,
+    result: {
+      title: "Читаемая часть листа",
+      text: "После очистки проступили строки: «Заглушка. Здесь будет текст документа с датой, фамилией и местом».",
+    },
+  },
+};

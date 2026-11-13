@@ -50,3 +50,21 @@ export type Find = {
  * the moment of discovery (day, status).
  */
 export type FindTemplate = Omit<Find, "day" | "status">;
+
+/**
+ * Mold-removal restoration of a document: the player wipes mold spots off
+ * the paper to read what is written underneath.
+ */
+export type Restoration = {
+  /** Restoration kind (more kinds will be added: audio, ink, ...). */
+  kind: "mold";
+  /** Number of mold spots drawn on the paper (difficulty). */
+  spots: number;
+  /** What the player learns after the restoration is done. */
+  result: {
+    /** Short heading of the revealed text. */
+    title: string;
+    /** Revealed text. */
+    text: string;
+  };
+};

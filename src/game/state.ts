@@ -1,4 +1,4 @@
-import type { Find } from "./finds";
+import type { Find, FindStatus } from "./finds";
 
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {
@@ -100,6 +100,18 @@ export function updateState(patch: Partial<GameState>): void {
   state = { ...state, ...patch };
   saveState();
   listeners.forEach((l) => l(state));
+}
+
+/**
+ * Changes the processing status of one find and saves the game.
+ * @param {string} id - Find id.
+ * @param {FindStatus} status - New status.
+ * @returns {void}
+ */
+export function updateFindStatus(id: string, status: FindStatus): void {
+  updateState({
+    finds: state.finds.map((f) => (f.id === id ? { ...f, status } : f)),
+  });
 }
 
 /**

@@ -1,9 +1,9 @@
 import "./style.css";
-import { initNotifications, notify } from "./ui/notifications";
+import { initNotifications, notify } from "./ui/computer/notifications";
 import { addTableNews, initSpaces } from "./ui/spaces";
-import { initTabs } from "./ui/tabs";
-import { bindFinds } from "./ui/finds";
-import { bindTopbar } from "./ui/topbar";
+import { initTabs } from "./ui/computer/tabs";
+import { bindFinds } from "./ui/table/finds";
+import { bindTopbar } from "./ui/computer/topbar";
 import { endDay, type DayReport } from "./game/endDay";
 import {
   GROUP_TRIP_COST_HOURS,
@@ -11,7 +11,7 @@ import {
   getState,
   subscribe,
   updateState,
-} from "./state";
+} from "./game/state";
 import { PLACES, type Place } from "./map/places";
 import { initCampMap, type CampMap } from "./map/campMap";
 

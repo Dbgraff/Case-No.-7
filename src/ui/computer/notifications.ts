@@ -1,5 +1,5 @@
 import { say, type ChatKind } from "./chat";
-import { getActiveSpace, onSpaceChange, showSpace } from "./spaces";
+import { getActiveSpace, onSpaceChange, showSpace } from "../spaces";
 import { getActiveTab, onTabChange, showTab } from "./tabs";
 
 /** Id of the tab that contains the chat. */

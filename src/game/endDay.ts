@@ -1,6 +1,6 @@
 import { FIND_TEMPLATES } from "../data/finds";
-import type { Find } from "../finds";
-import { HOURS_PER_DAY, getState, updateState } from "../state";
+import type { Find } from "./finds";
+import { HOURS_PER_DAY, getState, updateState } from "./state";
 
 /** Result of one group trip made during the day. */
 export type TripResult = {

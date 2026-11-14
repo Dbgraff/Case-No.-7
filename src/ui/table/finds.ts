@@ -2,12 +2,12 @@ import {
   FIND_STATUS_LABELS,
   FIND_TYPE_LABELS,
   type Find,
-} from "../finds";
-import { RESTORATIONS } from "../data/finds";
-import { PLACES } from "../map/places";
-import { subscribe, updateFindStatus, type GameState } from "../state";
-import { notify } from "./notifications";
-import { openRestoration } from "./restore";
+} from "../../game/finds";
+import { RESTORATIONS } from "../../data/finds";
+import { PLACES } from "../../map/places";
+import { subscribe, updateFindStatus, type GameState } from "../../game/state";
+import { notify } from "../computer/notifications";
+import { openRestoration } from "../restore";
 
 /**
  * Returns a small stable tilt (in degrees) for a find, so that items lie on

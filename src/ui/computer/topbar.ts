@@ -1,4 +1,4 @@
-import { subscribe, type GameState } from "../state";
+import { subscribe, type GameState } from "../../game/state";
 
 /**
  * Keeps the day and hours-left counters in the top bar in sync with the game state.

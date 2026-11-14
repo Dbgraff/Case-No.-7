@@ -1,4 +1,4 @@
-import type { Find, Restoration } from "../finds";
+import type { Find, Restoration } from "./../game/finds";
 
 /** Logical size of the paper, px (the canvas is scaled by CSS). */
 const W = 560;
@@ -9,6 +9,12 @@ const BRUSH = 38;
 
 /** Share of the mold that must be removed to finish the restoration. */
 const DONE_AT = 0.9;
+
+/** Share of mold removed by one brush stamp (0..1). Lower = more passes needed. */
+const MOLD_STRENGTH = 0.1;
+
+/** Mold amount multiplier relative to `restoration.spots`. */
+const MOLD_DENSITY = 2;
 
 /**
  * Creates a small seeded random number generator (mulberry32), so the same
@@ -79,30 +85,74 @@ function drawPaper(ctx: CanvasRenderingContext2D, result: Restoration["result"])
 }
 
 /**
- * Draws mold spots (soft green-grey blotches) on the mold layer.
+ * Stamps one soft, slightly random blob that erases part of the layer's
+ * opacity. Many overlapping stamps give a smooth, uneven wipe.
+ * @param {CanvasRenderingContext2D} ctx - Layer to erase from.
+ * @param {number} x - Center x.
+ * @param {number} y - Center y.
+ * @param {number} radius - Brush radius, px.
+ * @param {number} alpha - Erase strength of the center (0..1).
+ * @returns {void}
+ */
+function stamp(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  alpha: number,
+): void {
+  const r = radius * (0.8 + Math.random() * 0.4);
+  const cx = x + (Math.random() - 0.5) * radius * 0.4;
+  const cy = y + (Math.random() - 0.5) * radius * 0.4;
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  g.addColorStop(0, `rgba(0, 0, 0, ${alpha})`);
+  g.addColorStop(0.5, `rgba(0, 0, 0, ${alpha * 0.6})`);
+  g.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
+ * Draws mold: big uneven patches (dense core, thin edges, different
+ * opacity per blob) plus small spores around them.
  * @param {CanvasRenderingContext2D} ctx - Context of the mold canvas.
  * @param {() => number} rng - Seeded random generator.
- * @param {number} spots - Number of spots.
+ * @param {number} spots - Base number of spots (multiplied by MOLD_DENSITY).
  * @returns {void}
  */
 function drawMold(ctx: CanvasRenderingContext2D, rng: () => number, spots: number): void {
-  for (let i = 0; i < spots; i++) {
-    const cx = 70 + rng() * (W - 140);
-    const cy = 70 + rng() * (H - 140);
-    const r = 34 + rng() * 30;
-    for (let k = 0; k < 10; k++) {
+  const total = Math.round(spots * MOLD_DENSITY);
+  for (let i = 0; i < total; i++) {
+    const cx = 50 + rng() * (W - 100);
+    const cy = 50 + rng() * (H - 100);
+    const r = 45 + rng() * 45;
+
+    for (let k = 0; k < 28; k++) {
       const ang = rng() * Math.PI * 2;
-      const dist = rng() * r * 0.8;
+      const dist = rng() ** 1.5 * r; // more blobs near the center
       const x = cx + Math.cos(ang) * dist;
       const y = cy + Math.sin(ang) * dist;
-      const rr = r * (0.4 + rng() * 0.45);
+      const rr = r * (0.25 + rng() * 0.45);
+      const a = 0.35 + rng() * 0.6; // some blobs are thin, some dense
       const grad = ctx.createRadialGradient(x, y, 0, x, y, rr);
-      grad.addColorStop(0, "rgba(44, 62, 36, 0.97)");
-      grad.addColorStop(0.65, "rgba(76, 102, 56, 0.9)");
+      grad.addColorStop(0, `rgba(44, 62, 36, ${a})`);
+      grad.addColorStop(0.6, `rgba(76, 102, 56, ${a * 0.9})`);
       grad.addColorStop(1, "rgba(76, 102, 56, 0)");
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(x, y, rr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    for (let k = 0; k < 40; k++) {
+      const ang = rng() * Math.PI * 2;
+      const dist = r * (0.6 + rng() * 0.9);
+      ctx.fillStyle = `rgba(60, 84, 44, ${0.3 + rng() * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(ang) * dist, cy + Math.sin(ang) * dist, 1 + rng() * 3, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -238,19 +288,21 @@ export function openRestoration(
   };
 
   /**
-   * Wipes the mold along a segment from the last point to (x, y).
+   * Wipes the mold along a segment from the last point to (x, y) with soft
+   * stamps placed every few pixels.
    * @param {number} x - End x.
    * @param {number} y - End y.
    * @returns {void}
    */
   const wipe = (x: number, y: number): void => {
-    moldCtx.globalCompositeOperation = "destination-out";
-    moldCtx.lineWidth = BRUSH;
-    moldCtx.lineCap = "round";
-    moldCtx.beginPath();
-    moldCtx.moveTo(lastX, lastY);
-    moldCtx.lineTo(x, y);
-    moldCtx.stroke();
+    const dx = x - lastX;
+    const dy = y - lastY;
+    const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / (BRUSH * 0.2)));
+    for (let i = 1; i <= steps; i++) {
+      const px = lastX + (dx * i) / steps;
+      const py = lastY + (dy * i) / steps;
+      stamp(moldCtx, px, py, BRUSH / 2, MOLD_STRENGTH);
+    }
     lastX = x;
     lastY = y;
   };

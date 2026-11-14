@@ -5,16 +5,25 @@ const W = 560;
 const H = 380;
 
 /** Wiping brush width, px. */
-const BRUSH = 38;
+const BRUSH = 52;
 
 /** Share of the mold that must be removed to finish the restoration. */
-const DONE_AT = 0.9;
+const DONE_AT = 0.7;
 
 /** Share of mold removed by one brush stamp (0..1). Lower = more passes needed. */
 const MOLD_STRENGTH = 0.1;
 
 /** Mold amount multiplier relative to `restoration.spots`. */
 const MOLD_DENSITY = 2;
+
+/** Wiping speed above which the ink starts to wear off, canvas px per ms. */
+const SAFE_SPEED = 0.6;
+
+/** Share of ink removed by one stamp at maximum damage (0..1). */
+const INK_STRENGTH = 0.3;
+
+/** Hint shown while the player wipes too fast. */
+const WARN_TEXT = "Чернила стираются — двигайте медленнее.";
 
 /**
  * Creates a small seeded random number generator (mulberry32), so the same
@@ -64,7 +73,7 @@ function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number
  * @param {Restoration["result"]} result - Text to write on the paper.
  * @returns {void}
  */
-function drawPaper(ctx: CanvasRenderingContext2D, result: Restoration["result"]): void {
+function drawPaper(ctx: CanvasRenderingContext2D): void {
   const g = ctx.createLinearGradient(0, 0, W, H);
   g.addColorStop(0, "#efe7cf");
   g.addColorStop(1, "#dccfa9");
@@ -73,7 +82,16 @@ function drawPaper(ctx: CanvasRenderingContext2D, result: Restoration["result"])
   ctx.strokeStyle = "rgba(109, 91, 44, 0.45)";
   ctx.lineWidth = 3;
   ctx.strokeRect(1.5, 1.5, W - 3, H - 3);
+}
 
+/**
+ * Draws the handwritten text on its own transparent layer, so it can wear
+ * off without damaging the paper.
+ * @param {CanvasRenderingContext2D} ctx - Context of the ink canvas.
+ * @param {Restoration["result"]} result - Text to write.
+ * @returns {void}
+ */
+function drawInk(ctx: CanvasRenderingContext2D, result: Restoration["result"]): void {
   ctx.fillStyle = "#2b2416";
   ctx.textBaseline = "top";
   ctx.font = "30px Neucha, 'Comic Sans MS', cursive";
@@ -82,6 +100,28 @@ function drawPaper(ctx: CanvasRenderingContext2D, result: Restoration["result"])
   ctx.font = "24px Neucha, 'Comic Sans MS', cursive";
   const lines = wrapLines(ctx, result.text, W - 72);
   lines.forEach((l, i) => ctx.fillText(l, 36, 96 + i * 32));
+}
+
+/**
+ * Converts wiping speed to ink damage.
+ * @param {number} speed - Wiping speed, canvas px per ms.
+ * @returns {number} Damage from 0 (safe) to 1 (maximum).
+ */
+function inkDamage(speed: number): number {
+  return Math.min(1, Math.max(0, (speed - SAFE_SPEED) / SAFE_SPEED));
+}
+
+/**
+ * Estimates how much ink is left (sum of sampled opacity, so half-erased
+ * ink counts as half).
+ * @param {CanvasRenderingContext2D} ctx - Context of the ink canvas.
+ * @returns {number} Relative amount of ink.
+ */
+function inkLeft(ctx: CanvasRenderingContext2D): number {
+  const d = ctx.getImageData(0, 0, W, H).data;
+  let sum = 0;
+  for (let i = 3; i < d.length; i += 16) sum += d[i];
+  return sum / 255;
 }
 
 /**
@@ -199,14 +239,14 @@ export function openRestoration(
   const stage = document.createElement("div");
   stage.className = "restore-stage";
   const base = document.createElement("canvas");
+  const ink = document.createElement("canvas");
   const mold = document.createElement("canvas");
-  for (const c of [base, mold]) {
+  for (const c of [base, ink, mold]) {
     c.width = W;
     c.height = H;
   }
   mold.className = "restore-mold";
-  stage.appendChild(base);
-  stage.appendChild(mold);
+  stage.append(base, ink, mold);
 
   const bar = document.createElement("div");
   bar.className = "restore-bar";
@@ -235,6 +275,8 @@ export function openRestoration(
 
   const baseCtx = base.getContext("2d")!;
   const moldCtx = mold.getContext("2d")!;
+  const inkCtx = ink.getContext("2d")!;
+  let initialInk = 1;
   let initial = 1;
   let finished = false;
 
@@ -248,9 +290,11 @@ export function openRestoration(
     } catch {
       // font failed to load — fallback font is used
     }
-    drawPaper(baseCtx, restoration.result);
+    drawPaper(baseCtx);
+    drawInk(inkCtx, restoration.result);
     drawMold(moldCtx, seededRandom(find.id), restoration.spots);
     initial = Math.max(coverage(moldCtx), 1);
+    initialInk = Math.max(inkLeft(inkCtx), 1);
   };
   void setup();
 
@@ -266,8 +310,10 @@ export function openRestoration(
       finished = true;
       moldCtx.clearRect(0, 0, W, H);
       barFill.style.width = "100%";
-      hint.textContent = "Готово — текст можно прочитать.";
-      close.textContent = "Готово";
+      hint.textContent =
+        inkLeft(inkCtx) / initialInk > 0.8
+          ? "Готово — текст можно прочитать."
+          : "Готово, но часть надписи стёрта.";      close.textContent = "Готово";
       onDone();
     }
   };
@@ -276,6 +322,10 @@ export function openRestoration(
   let lastX = 0;
   let lastY = 0;
   let lastCheck = 0;
+  let lastT = 0;
+  let segDist = 0;
+  let segTime = 0;
+  let damage = 0;
 
   /**
    * Converts a pointer event to canvas coordinates.
@@ -294,7 +344,7 @@ export function openRestoration(
    * @param {number} y - End y.
    * @returns {void}
    */
-  const wipe = (x: number, y: number): void => {
+  const wipe = (x: number, y: number, dmg = 0): void => {
     const dx = x - lastX;
     const dy = y - lastY;
     const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / (BRUSH * 0.2)));
@@ -302,21 +352,40 @@ export function openRestoration(
       const px = lastX + (dx * i) / steps;
       const py = lastY + (dy * i) / steps;
       stamp(moldCtx, px, py, BRUSH / 2, MOLD_STRENGTH);
+      if (dmg > 0) stamp(inkCtx, px, py, BRUSH / 2, dmg * INK_STRENGTH);
     }
     lastX = x;
     lastY = y;
   };
 
   mold.addEventListener("pointerdown", (e) => {
+    if (finished) return;
     drawing = true;
     mold.setPointerCapture(e.pointerId);
     [lastX, lastY] = toCanvas(e);
+    lastT = e.timeStamp;
+    segDist = 0;
+    segTime = 0;
+    damage = 0;
     wipe(lastX + 0.01, lastY);
   });
   mold.addEventListener("pointermove", (e) => {
-    if (!drawing) return;
+    if (!drawing || finished) return;
     const [x, y] = toCanvas(e);
-    wipe(x, y);
+
+    // speed is measured over windows of ~16 ms, so single events don't spike it
+    segDist += Math.hypot(x - lastX, y - lastY);
+    segTime += e.timeStamp - lastT;
+    lastT = e.timeStamp;
+    if (segTime >= 16) {
+      damage = inkDamage(segDist / segTime);
+      segDist = 0;
+      segTime = 0;
+      hint.textContent =
+        damage > 0.3 ? WARN_TEXT : "Зажмите кнопку мыши (или палец) и протирайте пятна плесени.";
+    }
+
+    wipe(x, y, damage);
     const now = performance.now();
     if (now - lastCheck > 250) {
       lastCheck = now;

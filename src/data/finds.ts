@@ -58,6 +58,7 @@ export const FIND_TEMPLATES: FindTemplate[] = [
     placeId: "k2",
     circumstances: "Нашли в щели подоконника корпуса 2, вложена в старый журнал.",
     related: [],
+    searchWords: ["шифр", "колесников", "эстрада"],
   },
 ];
 

@@ -68,10 +68,24 @@
 
         <!-- Archive placeholder -->
         <section class="pane" data-pane="archive" hidden>
-        <section class="pane" data-pane="archive" hidden>
-          <div id="archiveClues" class="archive"></div>
+          <div class="arch">
+            <aside class="arch-side">
+              <div class="qrow">
+                <input id="archQ" type="search" placeholder="Поиск по архиву клуба…" autocomplete="off" />
+                <button type="button" id="archQGo" class="btn">Найти</button>
+              </div>
+              <div class="label">Быстрый поиск</div>
+              <div id="archWords" class="chips"></div>
+              <div class="label">Результаты</div>
+              <div id="archHits" class="hits"></div>
+              <div id="archClues" class="arch-clues"></div>
+            </aside>
+            <div id="archDoc" class="arch-doc">
+              <p class="muted">Найдите документ слева. Начните, например, со слова «ракета».</p>
+            </div>
+          </div>
         </section>
-
+        
         <section class="pane" data-pane="case" hidden>
           <div class="placeholder">
             <h2>Дело № 7</h2>

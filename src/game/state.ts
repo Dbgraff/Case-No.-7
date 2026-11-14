@@ -18,8 +18,12 @@ export type GameState = {
   clues: Clue[];
   /** Tasks opened by clues. */
   tasks: Task[];
-    /** Current tutorial step. */
+  /** Current tutorial step. */
   tutorialStep: TutorialStep;
+  /** Ids of archive documents the player has opened. */
+  readDocs: string[];
+  /** Words the player pinned to archive quick-search by clicking in text. */
+  pinnedWords: string[];
 };
 
 /** localStorage key. Bump the version suffix when the save format changes. */
@@ -33,6 +37,8 @@ export const HOURS_PER_DAY = 5;
 
 /** Time cost of sending the group to a place, in hours. */
 export const GROUP_TRIP_COST_HOURS = 1;
+
+export const MAX_PINNED_WORDS = 10;
 
 type Listener = (state: Readonly<GameState>) => void;
 
@@ -52,6 +58,8 @@ return {
   clues: [],
   tasks: [],
   tutorialStep: "intro",
+  readDocs: [],
+  pinnedWords: []
 };}
 
 /**
@@ -89,7 +97,29 @@ function loadState(): GameState {
         : hasProgress
           ? "skipped"
           : "intro";
-      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds, groupPlaceId, clues, tasks, tutorialStep };    }
+      const readDocs =
+        Array.isArray(data.readDocs) && data.readDocs.every((x) => typeof x === "string")
+          ? data.readDocs
+          : [];
+
+      const pinnedWords =
+        Array.isArray(data.pinnedWords) && data.pinnedWords.every((x) => typeof x === "string")
+          ? data.pinnedWords
+          : [];
+
+      return {
+        day: data.day!,
+        hoursLeft: data.hoursLeft!,
+        visits,
+        finds,
+        groupPlaceId,
+        clues,
+        tasks,
+        tutorialStep,
+        readDocs,
+        pinnedWords,
+      };    
+    }
   } catch {
     // corrupted save or storage unavailable — start over
   }
@@ -141,6 +171,12 @@ export function updateFindStatus(id: string, status: FindStatus): void {
   });
 }
 
+/** Marks an archive document as read. */
+export function markDocRead(id: string): void {
+  if (state.readDocs.includes(id)) return;
+  updateState({ readDocs: [...state.readDocs, id] });
+}
+
 /**
  * Subscribes to state changes. The listener is called once immediately
  * with the current state.
@@ -161,4 +197,16 @@ export function resetState(): void {
   state = createInitialState();
   saveState();
   listeners.forEach((l) => l(state));
+}
+
+/** Adds a word to quick-search chips (normalized, no duplicates). */
+export function pinArchiveWord(raw: string): void {
+  const w = raw
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^а-яa-z0-9]/g, "");
+  if (w.length < 3) return;
+  if (state.pinnedWords.includes(w)) return;
+  if (state.pinnedWords.length >= MAX_PINNED_WORDS) return; // лимит
+  updateState({ pinnedWords: [...state.pinnedWords, w] });
 }

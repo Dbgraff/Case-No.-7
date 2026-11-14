@@ -43,8 +43,10 @@ export type Find = {
   status: FindStatus;
   /** Ids of related tasks and materials. */
   related: string[];
-    /** Result of the restoration, if it produced one (e.g. the saved clean copy of a tape). */
+  /** Result of the restoration, if it produced one (e.g. the saved clean copy of a tape). */
   outcome?: RestorationOutcome;
+  /** Words added to archive quick-search after this find is restored. */
+  searchWords?: string[];
 };
 
 /**

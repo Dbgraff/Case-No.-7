@@ -1,5 +1,6 @@
 import type { Find, FindStatus } from "./finds";
 import type { Clue, Task } from "./clues";
+import { isTutorialStep, type TutorialStep } from "./tutorialSteps";
 
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {
@@ -17,6 +18,8 @@ export type GameState = {
   clues: Clue[];
   /** Tasks opened by clues. */
   tasks: Task[];
+    /** Current tutorial step. */
+  tutorialStep: TutorialStep;
 };
 
 /** localStorage key. Bump the version suffix when the save format changes. */
@@ -48,6 +51,7 @@ return {
   groupPlaceId: START_PLACE_ID,
   clues: [],
   tasks: [],
+  tutorialStep: "intro",
 };}
 
 /**
@@ -73,9 +77,19 @@ function loadState(): GameState {
       const finds = Array.isArray(data.finds) ? data.finds : [];
       const groupPlaceId =
         typeof data.groupPlaceId === "string" ? data.groupPlaceId : START_PLACE_ID;
+
       const clues = Array.isArray(data.clues) ? data.clues : [];
       const tasks = Array.isArray(data.tasks) ? data.tasks : [];
-      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds, groupPlaceId, clues, tasks };    }
+
+            // old saves have no tutorialStep: if the player already has progress,
+      // the tutorial is skipped, otherwise it starts
+      const hasProgress = data.day! > 1 || finds.length > 0 || visits.length > 0;
+      const tutorialStep: TutorialStep = isTutorialStep(data.tutorialStep)
+        ? data.tutorialStep
+        : hasProgress
+          ? "skipped"
+          : "intro";
+      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds, groupPlaceId, clues, tasks, tutorialStep };    }
   } catch {
     // corrupted save or storage unavailable — start over
   }

@@ -6,9 +6,9 @@ import {
 import { RESTORATIONS } from "../../data/finds";
 import { PLACES } from "../../map/places";
 import { subscribe, updateFindStatus, type GameState } from "../../game/state";
-import { notify } from "../computer/notifications";
 import { openRestoration } from "../restore";
 import { finishRestoration } from "./restoreReport";
+import { completeTutorialStep } from "../../game/tutorial";
 
 /**
  * Returns a small stable tilt (in degrees) for a find, so that items lie on
@@ -189,6 +189,7 @@ export function bindFinds(): void {
       surface.appendChild(
         renderItem(f, f.id === selectedId, () => {
           selectedId = f.id;
+          completeTutorialStep("selectItem", f.id);
           render();
         }),
       );

@@ -15,6 +15,10 @@ import {
 import { PLACES, type Place } from "./map/places";
 import { initCampMap, type CampMap } from "./map/campMap";
 import { bindArchive } from "./ui/computer/archive";
+import { startTutorial } from "./game/tutorial";
+import { isTutorialRunning } from "./game/tutorialSteps";
+import { TUTORIAL_INTRO } from "./data/tutorial";
+import { bindTutorial } from "./ui/computer/tutorial";
 
 /** Place currently chosen on the map (not yet visited). */
 let selected: Place | null = null;
@@ -163,14 +167,21 @@ bindFinds();
 subscribe(refreshSendButton);
 bindArchive();
 
-notify(
-  "Даша",
-  "Штаб, мы у ворот «Ракеты». До заката пять часов. Корпуса 1, 2 и 4 — третьего нет. Где жила «Искра»?",
-);
-notify(
-  "Командир",
-  "Поиск по архиву бесплатный. Выходы группы стоят времени. Сначала разберитесь в документах, потом отправляйте ребят.",
-);
+if (startTutorial()) addTableNews(1);
+
+if (isTutorialRunning(getState().tutorialStep)) {
+  notify(TUTORIAL_INTRO.who, TUTORIAL_INTRO.text);
+} else {
+  notify(
+    "Даша",
+    "Штаб, мы у ворот «Ракеты». До заката пять часов. Корпуса 1, 2 и 4 — третьего нет. Где жила «Искра»?",
+  );
+  notify(
+    "Командир",
+    "Поиск по архиву бесплатный. Выходы группы стоят времени. Сначала разберитесь в документах, потом отправляйте ребят.",
+  );
+}
+bindTutorial();
 
 initCampMap(document.getElementById("pixi-host")!, PLACES, {
   onSelect: (p) => {

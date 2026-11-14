@@ -1,5 +1,6 @@
 import { completeRestoration } from "../../game/restoration";
 import { notify } from "../computer/notifications";
+import { completeTutorialStep } from "../../game/tutorial";
 
 /**
  * Single entry point for "the item is restored": updates the game state and
@@ -21,4 +22,5 @@ export function finishRestoration(findId: string): void {
     notify("Система", `Реставрация «${r.find.title}» завершена. Новых зацепок нет.`, "sys");
   }
   if (r.task) notify("Система", `Новое задание: «${r.task.title}».`, "sys");
+  completeTutorialStep("restore", findId);
 }

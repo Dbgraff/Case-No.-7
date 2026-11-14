@@ -1,6 +1,7 @@
 import type { Find, FindStatus } from "./finds";
 import type { Clue, Task } from "./clues";
 import { isTutorialStep, type TutorialStep } from "./tutorialSteps";
+import type { BoardCard, BoardSlotId } from "./board";
 
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {
@@ -24,6 +25,10 @@ export type GameState = {
   readDocs: string[];
   /** Words the player pinned to archive quick-search by clicking in text. */
   pinnedWords: string[];
+  /** Cards available on the board (opened by clues). */
+  boardCards: BoardCard[];
+  /** Which card id sits in which slot (null = empty). */
+  boardSlots: Record<BoardSlotId, string | null>;
 };
 
 /** localStorage key. Bump the version suffix when the save format changes. */
@@ -59,7 +64,9 @@ return {
   tasks: [],
   tutorialStep: "intro",
   readDocs: [],
-  pinnedWords: []
+  pinnedWords: [],
+  boardCards: [],
+  boardSlots: { who: null, when: null, where: null, conclusion: null },
 };}
 
 /**
@@ -107,6 +114,17 @@ function loadState(): GameState {
           ? data.pinnedWords
           : [];
 
+      const boardCards = Array.isArray(data.boardCards) ? data.boardCards : [];
+      const boardSlots =
+        data.boardSlots && typeof data.boardSlots === "object"
+          ? {
+              who: (data.boardSlots as GameState["boardSlots"]).who ?? null,
+              when: (data.boardSlots as GameState["boardSlots"]).when ?? null,
+              where: (data.boardSlots as GameState["boardSlots"]).where ?? null,
+              conclusion: (data.boardSlots as GameState["boardSlots"]).conclusion ?? null,
+            }
+          : { who: null, when: null, where: null, conclusion: null };
+
       return {
         day: data.day!,
         hoursLeft: data.hoursLeft!,
@@ -118,6 +136,8 @@ function loadState(): GameState {
         tutorialStep,
         readDocs,
         pinnedWords,
+        boardCards,
+        boardSlots,
       };    
     }
   } catch {
@@ -209,4 +229,20 @@ export function pinArchiveWord(raw: string): void {
   if (state.pinnedWords.includes(w)) return;
   if (state.pinnedWords.length >= MAX_PINNED_WORDS) return; // лимит
   updateState({ pinnedWords: [...state.pinnedWords, w] });
+}
+
+/** Puts a board card into a slot (or clears the slot if cardId is null). */
+export function setBoardSlot(slot: BoardSlotId, cardId: string | null): void {
+  updateState({
+    boardSlots: { ...state.boardSlots, [slot]: cardId },
+  });
+}
+
+/** Adds board cards if they are not already in state. */
+export function addBoardCards(cards: BoardCard[]): void {
+  if (!cards.length) return;
+  const have = new Set(state.boardCards.map((c) => c.id));
+  const next = cards.filter((c) => !have.has(c.id));
+  if (!next.length) return;
+  updateState({ boardCards: [...state.boardCards, ...next] });
 }

@@ -19,6 +19,7 @@ import { startTutorial } from "./game/tutorial";
 import { isTutorialRunning } from "./game/tutorialSteps";
 import { TUTORIAL_INTRO } from "./data/tutorial";
 import { bindTutorial } from "./ui/computer/tutorial";
+import { bindCaseBoard } from "./ui/computer/caseBoard";
 
 /** Place currently chosen on the map (not yet visited). */
 let selected: Place | null = null;
@@ -166,6 +167,7 @@ bindTopbar();
 bindFinds();
 subscribe(refreshSendButton);
 bindArchive();
+bindCaseBoard();
 
 if (startTutorial()) addTableNews(1);
 

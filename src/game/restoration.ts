@@ -2,6 +2,7 @@ import type { Clue, Task } from "./clues";
 import { CLUE_TEMPLATES } from "../data/clues";
 import type { Find, RestorationOutcome } from "./finds";
 import { getState, updateState } from "./state";
+import { openBoardCardsForClue } from "../game/openBoardCards";
 
 /** What happened when a find was restored. */
 export type RestorationResult = {
@@ -49,5 +50,10 @@ export function completeRestoration(findId: string, outcome?: RestorationOutcome
     clues: clue ? [...s.clues, clue] : s.clues,
     tasks: task ? [...s.tasks, task] : s.tasks,
   });
+
+  if (clue) {
+    openBoardCardsForClue(clue.id);
+  }
+
   return { find, clue, task };
 }

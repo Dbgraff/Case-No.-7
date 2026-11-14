@@ -835,3 +835,30 @@ body {
 .desk-inspect > .btn {
   margin-top: 12px;
 }
+
+/* Archive: clues and tasks */
+.archive-section {
+  margin-bottom: 18px;
+}
+
+.archive-section h3 {
+  margin: 0 0 8px;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.clue-card {
+  max-width: 560px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--thread);
+  border-radius: 3px;
+}
+
+.clue-card p {
+  margin: 4px 0 6px;
+  font-size: 14px;
+}

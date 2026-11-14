@@ -1,4 +1,5 @@
 import type { Find, FindStatus } from "./finds";
+import type { Clue, Task } from "./clues";
 
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {
@@ -12,6 +13,10 @@ export type GameState = {
   finds: Find[];
   /** Id of the place where the group is right now. */
   groupPlaceId: string;
+  /** Clues opened by restored finds. */
+  clues: Clue[];
+  /** Tasks opened by clues. */
+  tasks: Task[];
 };
 
 /** localStorage key. Bump the version suffix when the save format changes. */
@@ -35,8 +40,15 @@ const listeners = new Set<Listener>();
  * @returns {GameState} Initial state.
  */
 function createInitialState(): GameState {
-  return { day: 1, hoursLeft: HOURS_PER_DAY, visits: [], finds: [], groupPlaceId: START_PLACE_ID };
-}
+return {
+  day: 1,
+  hoursLeft: HOURS_PER_DAY,
+  visits: [],
+  finds: [],
+  groupPlaceId: START_PLACE_ID,
+  clues: [],
+  tasks: [],
+};}
 
 /**
  * Reads the save from localStorage and validates it.
@@ -61,8 +73,9 @@ function loadState(): GameState {
       const finds = Array.isArray(data.finds) ? data.finds : [];
       const groupPlaceId =
         typeof data.groupPlaceId === "string" ? data.groupPlaceId : START_PLACE_ID;
-      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds, groupPlaceId };
-    }
+      const clues = Array.isArray(data.clues) ? data.clues : [];
+      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      return { day: data.day!, hoursLeft: data.hoursLeft!, visits, finds, groupPlaceId, clues, tasks };    }
   } catch {
     // corrupted save or storage unavailable — start over
   }

@@ -8,6 +8,7 @@ import { PLACES } from "../../map/places";
 import { subscribe, updateFindStatus, type GameState } from "../../game/state";
 import { notify } from "../computer/notifications";
 import { openRestoration } from "../restore";
+import { finishRestoration } from "./restoreReport";
 
 /**
  * Returns a small stable tilt (in degrees) for a find, so that items lie on
@@ -113,6 +114,22 @@ function renderInspect(host: HTMLElement, f: Find | undefined): void {
     tools.className = "desk-tools";
     tools.textContent = "Для этого предмета реставрация пока не подготовлена.";
     host.appendChild(tools);
+
+    if (f.status === "done") {
+      const done = document.createElement("p");
+      done.className = "muted";
+      done.textContent = "Реставрация завершена.";
+      host.appendChild(done);
+    } else if (import.meta.env.DEV) {
+      // TEMP: stub until the real restoration mechanic calls finishRestoration()
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn ghost";
+      btn.textContent = "[dev] Завершить реставрацию";
+      btn.addEventListener("click", () => finishRestoration(f.id));
+      host.appendChild(btn);
+    }
+
     return;
   }
 
@@ -134,14 +151,7 @@ function renderInspect(host: HTMLElement, f: Find | undefined): void {
   btn.textContent = f.status === "inProgress" ? "Продолжить реставрацию" : "Начать реставрацию";
   btn.addEventListener("click", () => {
     if (f.status === "new") updateFindStatus(f.id, "inProgress");
-    openRestoration(f, restoration, () => {
-      updateFindStatus(f.id, "done");
-      notify(
-        "Система",
-        `Реставрация завершена: «${f.title}». ${restoration.result.title}.`,
-        "story",
-      );
-    });
+    openRestoration(f, restoration, () => finishRestoration(f.id))
   });
   host.appendChild(btn);
 }

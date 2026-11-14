@@ -14,6 +14,7 @@ import {
 } from "./game/state";
 import { PLACES, type Place } from "./map/places";
 import { initCampMap, type CampMap } from "./map/campMap";
+import { bindArchive } from "./ui/computer/archive";
 
 /** Place currently chosen on the map (not yet visited). */
 let selected: Place | null = null;
@@ -160,6 +161,7 @@ initNotifications();
 bindTopbar();
 bindFinds();
 subscribe(refreshSendButton);
+bindArchive();
 
 notify(
   "Даша",

@@ -43,4 +43,15 @@ export const CLUE_TEMPLATES: ClueTemplate[] = [
       },
     },
   },
+  {
+    id: "clue-cipher-note",
+    findId: "find-cipher-note",
+    title: "Под сценой",
+    text: "В записке Серёжи Колесникова зашифровано место: «Под сценой». Тайник «Искры» — у эстрады.",
+    task: {
+      id: "task-stage-cache",
+      title: "Проверить эстраду",
+      description: "Отправить группу к эстраде и поискать тайник под сценой.",
+    },
+  },
 ];

@@ -48,6 +48,17 @@ export const FIND_TEMPLATES: FindTemplate[] = [
     circumstances: "Лежала в ящике под сценой.",
     related: [],
   },
+  {
+    id: "find-cipher-note",
+    type: "note",
+    title: "Записка с цифрами",
+    description:
+      "Клочок бумаги в клетку. На одной стороне — ряды двузначных чисел, на обороте пометка «С. К.»",
+    foundBy: "Даша",
+    placeId: "k2",
+    circumstances: "Нашли в щели подоконника корпуса 2, вложена в старый журнал.",
+    related: [],
+  },
 ];
 
 /**
@@ -85,5 +96,19 @@ export const RESTORATIONS: Record<string, Restoration> = {
       speed: { from: 4.6, to: 4.95 },
     },
     result: { title: "Чистовая копия записи", text: "Заглушка." },
+  },
+  "find-cipher-note": {
+    kind: "cipher",
+    method: "polybius",
+    // encodePolybius("ПОД СЦЕНОЙ", "ВСЕГДАГОТОВ") при таблице 36 ячеек
+    ciphertext: "36 21 15 63 12 45 13 35 21 31",
+    plaintext: "ПОД СЦЕНОЙ",
+    key: "ВСЕГДА ГОТОВ",
+    hint: "Пары цифр — строка и столбец. Таблица начинается с ключа. Ключ — ответ пионеров на «Будь готов!».",
+    label: "Записка Серёжи · шифр",
+    result: {
+      title: "Расшифровка",
+      text: "«Под сценой». Там, где пели, — эстрада. Подтвердите тайник отчётом.",
+    },
   },
 };

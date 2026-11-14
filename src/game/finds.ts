@@ -107,6 +107,37 @@ export type AudioRestoration = {
   result: RestorationText;
 };
 
+/**
+ * Cipher restoration: the player decodes a message using a known method
+ * (Polybius square, Caesar shift) or by entering the plaintext after
+ * researching the method outside the game.
+ */
+export type CipherMethod = "polybius" | "caesar" | "answer";
+
+export type CipherRestoration = {
+  kind: "cipher";
+  /** Which solver UI to show. */
+  method: CipherMethod;
+  /** Ciphertext shown on the note (digits for Polybius, letters for others). */
+  ciphertext: string;
+  /**
+   * Correct plaintext. Comparison ignores case, ё/е and non-letters.
+   * For interactive methods this is also what the live decode must produce.
+   */
+  plaintext: string;
+  /**
+   * Polybius: keyword that starts the table (e.g. «ВСЕГДАГОТОВ»).
+   * Caesar / answer: unused.
+   */
+  key?: string;
+  /** Optional in-game hint (method name, slogan, etc.). */
+  hint?: string;
+  /** Heading of the note card in the UI. */
+  label?: string;
+  /** What the player learns after a successful decode. */
+  result: RestorationText;
+};
+
 /** What the player got out of a restoration. */
 export type RestorationOutcome = {
   /** Saved clean copy (what goes to the notes). */
@@ -116,4 +147,4 @@ export type RestorationOutcome = {
 };
 
 /** All restoration kinds. */
-export type Restoration = MoldRestoration | AudioRestoration;
+export type Restoration = MoldRestoration | AudioRestoration | CipherRestoration;

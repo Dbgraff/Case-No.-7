@@ -907,3 +907,88 @@ body {
 .audio-copy[hidden] {
   display: none;
 }
+
+/* Cipher restoration */
+.cipher-dialog {
+  width: min(640px, 100%);
+}
+
+.cipher-code {
+  font-family: var(--f-mono);
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  word-spacing: 0.35em;
+  padding: 12px 14px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-radius: 2px;
+  transform: rotate(-0.8deg);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.cipher-body {
+  display: grid;
+  gap: 12px;
+}
+
+.cipher-keyrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.cipher-key {
+  font-family: var(--f-mono);
+  font-size: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  width: min(280px, 100%);
+  border-radius: 2px;
+}
+
+.cipher-poly {
+  border-collapse: collapse;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  margin: 0 auto;
+}
+
+.cipher-poly td,
+.cipher-poly th {
+  width: 28px;
+  height: 28px;
+  text-align: center;
+  border: 1px solid var(--rule);
+}
+
+.cipher-poly th {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11px;
+  border-color: transparent;
+}
+
+.cipher-decoded {
+  font-family: var(--f-mono);
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  min-height: 1.4em;
+  padding: 6px 0;
+}
+
+.cipher-decoded.ok {
+  color: var(--ok);
+}
+
+.cipher-msg {
+  min-height: 1.3em;
+}
+
+.cipher-msg.ok {
+  color: var(--ok);
+}

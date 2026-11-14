@@ -139,7 +139,7 @@ function renderInspect(host: HTMLElement, f: Find | undefined): void {
     const h = document.createElement("b");
     h.textContent = restoration.result.title;
     const t = document.createElement("p");
-    t.textContent = restoration.result.text;
+    t.textContent = f.outcome?.text ?? restoration.result.text;
     result.append(h, t);
     host.appendChild(result);
     return;
@@ -151,7 +151,7 @@ function renderInspect(host: HTMLElement, f: Find | undefined): void {
   btn.textContent = f.status === "inProgress" ? "Продолжить реставрацию" : "Начать реставрацию";
   btn.addEventListener("click", () => {
     if (f.status === "new") updateFindStatus(f.id, "inProgress");
-    openRestoration(f, restoration, () => finishRestoration(f.id))
+    openRestoration(f, restoration, (outcome) => finishRestoration(f.id, outcome));
   });
   host.appendChild(btn);
 }

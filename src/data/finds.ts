@@ -1,4 +1,4 @@
-import type { FindTemplate, Restoration } from "../finds";
+import type { FindTemplate, Restoration } from "../game/finds";
 
 /**
  * ЗАГЛУШКИ для проверки механики. Настоящие улики, их происхождение и связи
@@ -38,6 +38,16 @@ export const FIND_TEMPLATES: FindTemplate[] = [
     circumstances: "Лежало на полке за стопкой журналов.",
     related: [],
   },
+  {
+    id: "find-tape",
+    type: "tape",
+    title: "Аудиокассета",
+    description: "Кассета без коробки, лента местами вытянута. Запись слышно плохо.",
+    foundBy: "Артём",
+    placeId: "stage",
+    circumstances: "Лежала в ящике под сценой.",
+    related: [],
+  },
 ];
 
 /**
@@ -60,5 +70,20 @@ export const RESTORATIONS: Record<string, Restoration> = {
       title: "Читаемая часть листа",
       text: "После очистки проступили строки: «Заглушка. Здесь будет текст документа с датой, фамилией и местом».",
     },
+  },
+  "find-tape": {
+    kind: "audio",
+    label: "Кассета «Встреча с ветераном», август 1975",
+    transcript: [
+      { text: "Говорит ветеран. Заглушка текста записи. Номер полевой почты: " },
+      { text: "43817", fragile: true },
+      { text: ". Конец записи." },
+    ],
+    good: {
+      noise: { from: 40, to: 60 },
+      hum: { from: 55, to: 80 },
+      speed: { from: 4.6, to: 4.95 },
+    },
+    result: { title: "Чистовая копия записи", text: "Заглушка." },
   },
 };

@@ -33,4 +33,10 @@ export type ClueTemplate = {
   title: string;
   text: string;
   task?: Omit<Task, "clueId" | "done">;
+  
+  /** Variant used when fragile parts were lost during restoration. */
+  onLost?: {
+    text: string;
+    task?: Omit<Task, "clueId" | "done">;
+  };
 };

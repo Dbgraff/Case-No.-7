@@ -1,4 +1,5 @@
-import type { Find, Restoration } from "./../game/finds";
+import type { Find, Restoration, RestorationOutcome } from "./../game/finds";
+import { openAudioRestoration } from "./restoreAudio";
 
 /** Logical size of the paper, px (the canvas is scaled by CSS). */
 const W = 560;
@@ -221,8 +222,13 @@ function coverage(ctx: CanvasRenderingContext2D): number {
 export function openRestoration(
   find: Find,
   restoration: Restoration,
-  onDone: () => void,
+  onDone: (outcome?: RestorationOutcome) => void,
 ): void {
+  if (restoration.kind === "audio") {
+    openAudioRestoration(find, restoration, onDone);
+    return;
+  }
+
   const overlay = document.createElement("div");
   overlay.className = "restore-overlay";
 

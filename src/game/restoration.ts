@@ -1,6 +1,6 @@
 import type { Clue, Task } from "./clues";
 import { CLUE_TEMPLATES } from "../data/clues";
-import type { Find } from "./finds";
+import type { Find, RestorationOutcome } from "./finds";
 import { getState, updateState } from "./state";
 
 /** What happened when a find was restored. */
@@ -20,26 +20,29 @@ export type RestorationResult = {
  * @returns {RestorationResult | null} Result, or `null` if the find is
  * unknown or has already been restored.
  */
-export function completeRestoration(findId: string): RestorationResult | null {
+export function completeRestoration(findId: string, outcome?: RestorationOutcome): RestorationResult | null {
   const s = getState();
   const found = s.finds.find((f) => f.id === findId);
   if (!found || found.status === "done") return null;
 
-  const find: Find = { ...found, status: "done" };
+  const find: Find = { ...found, status: "done", ...(outcome ? { outcome } : {}) };
   const template = CLUE_TEMPLATES.find(
     (t) => t.findId === findId && !s.clues.some((c) => c.id === t.id),
   );
+  
+  const lost = outcome?.digitsLost ? template?.onLost : undefined;
   const clue: Clue | null = template
     ? {
         id: template.id,
         title: template.title,
-        text: template.text,
+        text: lost?.text ?? template.text,
         findId,
         day: s.day,
       }
     : null;
+  const taskSource = lost?.task ?? template?.task;
   const task: Task | null =
-    template?.task ? { ...template.task, clueId: template.id, done: false } : null;
+    template && taskSource ? { ...taskSource, clueId: template.id, done: false } : null;
 
   updateState({
     finds: s.finds.map((f) => (f.id === findId ? find : f)),

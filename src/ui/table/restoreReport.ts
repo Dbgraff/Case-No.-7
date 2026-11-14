@@ -1,15 +1,17 @@
 import { completeRestoration } from "../../game/restoration";
 import { notify } from "../computer/notifications";
 import { completeTutorialStep } from "../../game/tutorial";
+import type { RestorationOutcome } from "../../game/finds";
 
 /**
  * Single entry point for "the item is restored": updates the game state and
  * reports the result in the chat. Call it from the restoration mechanic.
  * @param {string} findId - Id of the restored find.
+ * @param {RestorationOutcome} [outcome] - Result of the restoration, if any.
  * @returns {void}
  */
-export function finishRestoration(findId: string): void {
-  const r = completeRestoration(findId);
+export function finishRestoration(findId: string, outcome?: RestorationOutcome): void {
+  const r = completeRestoration(findId, outcome);
   if (!r) return;
 
   if (r.clue) {

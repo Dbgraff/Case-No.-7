@@ -43,6 +43,8 @@ export type Find = {
   status: FindStatus;
   /** Ids of related tasks and materials. */
   related: string[];
+    /** Result of the restoration, if it produced one (e.g. the saved clean copy of a tape). */
+  outcome?: RestorationOutcome;
 };
 
 /**
@@ -51,20 +53,67 @@ export type Find = {
  */
 export type FindTemplate = Omit<Find, "day" | "status">;
 
+/** Text revealed after a restoration is done. */
+export type RestorationText = {
+  /** Short heading of the revealed text. */
+  title: string;
+  /** Revealed text. */
+  text: string;
+};
+
 /**
  * Mold-removal restoration of a document: the player wipes mold spots off
  * the paper to read what is written underneath.
  */
-export type Restoration = {
-  /** Restoration kind (more kinds will be added: audio, ink, ...). */
+export type MoldRestoration = {
   kind: "mold";
   /** Number of mold spots drawn on the paper (difficulty). */
   spots: number;
   /** What the player learns after the restoration is done. */
-  result: {
-    /** Short heading of the revealed text. */
-    title: string;
-    /** Revealed text. */
-    text: string;
-  };
+  result: RestorationText;
 };
+
+/**
+ * Audio restoration of a tape: the player tunes the playback speed and the
+ * noise filter until the recording becomes clear.
+ */
+/** A part of a tape transcript. */
+export type TranscriptPart = {
+  /** Text of the part. */
+  text: string;
+  /** Fragile parts (e.g. digits) are lost forever if the tape is over-cleaned. */
+  fragile?: boolean;
+};
+
+/** Range of "good" values of a slider. */
+export type ValueRange = {
+  from: number;
+  to: number;
+};
+
+/**
+ * Audio restoration of a tape: the player tunes three sliders (noise
+ * reduction, 50 Hz hum filter, tape speed) and records a clean copy.
+ */
+export type AudioRestoration = {
+  kind: "audio";
+  /** Heading of the tape card. */
+  label: string;
+  /** What is recorded on the tape, in parts. */
+  transcript: TranscriptPart[];
+  /** Good ranges: noise and hum in %, speed in cm/s. */
+  good: { noise: ValueRange; hum: ValueRange; speed: ValueRange };
+  /** Heading and fallback text of the result. */
+  result: RestorationText;
+};
+
+/** What the player got out of a restoration. */
+export type RestorationOutcome = {
+  /** Saved clean copy (what goes to the notes). */
+  text: string;
+  /** `true` if fragile parts (e.g. digits) were not saved. */
+  digitsLost: boolean;
+};
+
+/** All restoration kinds. */
+export type Restoration = MoldRestoration | AudioRestoration;

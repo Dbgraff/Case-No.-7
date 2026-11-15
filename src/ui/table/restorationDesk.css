@@ -1,0 +1,482 @@
+
+/*
+ * Дело № 7 — стол реставратора
+ * Фон из согласованного макета.
+ * Не изменяет рабочий стол компьютера.
+ */
+
+#app.integrated-desktop .id-table-workspace {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 54px 0 0;
+  background: #3e2719;
+}
+
+#app.integrated-desktop .id-table-content {
+  width: 100%;
+  max-width: none;
+  min-height: calc(100dvh - 54px);
+  margin: 0;
+}
+
+/* Основная сцена */
+
+#app.integrated-desktop #spaceTable {
+  position: relative;
+  isolation: isolate;
+  display: block;
+
+  width: 100%;
+  min-height: max(680px, calc(100dvh - 54px));
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+
+  background: #3e2719 !important;
+  color: #302519;
+}
+
+/*
+ * Отдельный слой с изображением.
+ * Не зависит от background других CSS-правил.
+ */
+
+#app.integrated-desktop #spaceTable::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  display: block;
+
+  background-image: url("/restoration-workbench.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+
+  pointer-events: none;
+}
+
+/* Убираем старую шапку */
+
+#app.integrated-desktop #spaceTable .desk-top {
+  display: none !important;
+}
+
+/* Переключатель Монитор / Стол */
+
+#app.integrated-desktop .workspace-switch {
+  z-index: 2200;
+}
+
+/* Зона находок на зелёном коврике */
+
+#app.integrated-desktop #spaceTable .desk-surface {
+  position: absolute;
+  z-index: 1;
+
+  left: 15.5%;
+  top: 29%;
+
+  width: 48%;
+  height: 54%;
+  min-height: 0;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(110px, 46%);
+  align-content: start;
+  align-items: center;
+  justify-items: center;
+
+  gap: 3% 4%;
+  margin: 0;
+  padding: 0;
+
+  overflow: auto;
+
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
+}
+
+#app.integrated-desktop #spaceTable .desk-surface::before,
+#app.integrated-desktop #spaceTable .desk-surface::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Предметы */
+
+#app.integrated-desktop #spaceTable .desk-item {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  width: 100%;
+  max-width: 190px;
+  height: 100%;
+  min-height: 0;
+
+  padding: 12px 11px;
+  overflow: hidden;
+
+  border: 0;
+  border-radius: 2px;
+
+  background: #e7d7b2;
+  color: #34281c;
+
+  box-shadow:
+    3px 6px 12px #160d0990,
+    inset 0 0 0 1px #6c4c2c33;
+
+  font-family: "Neucha", cursive;
+  font-size: clamp(14px, 1.15vw, 20px);
+  line-height: 1.2;
+  text-align: left;
+
+  cursor: pointer;
+
+  transform: rotate(var(--tilt, 0deg));
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#app.integrated-desktop #spaceTable .desk-item:hover,
+#app.integrated-desktop #spaceTable .desk-item:focus-visible {
+  transform: rotate(0deg) translateY(-7px) scale(1.035);
+  box-shadow: 4px 12px 22px #100a08b0;
+  outline: 2px solid #f3c777;
+  outline-offset: 3px;
+}
+
+#app.integrated-desktop #spaceTable .desk-item.sel {
+  outline: 3px solid #f0bd64;
+  outline-offset: 3px;
+}
+
+/* Фактура бумаги */
+
+#app.integrated-desktop #spaceTable .desk-item::before {
+  content: "";
+  position: absolute;
+  inset: 9px 9px 43%;
+  opacity: 0.85;
+  pointer-events: none;
+
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 11px,
+    #745d4738 12px 13px
+  );
+}
+
+#app.integrated-desktop #spaceTable .desk-item-title,
+#app.integrated-desktop #spaceTable .desk-item-kind {
+  position: relative;
+  z-index: 1;
+}
+
+#app.integrated-desktop #spaceTable .desk-item-title {
+  display: block;
+  padding: 3px 4px;
+  background: #e9d9bbdc;
+  overflow-wrap: anywhere;
+}
+
+#app.integrated-desktop #spaceTable .desk-item-kind {
+  margin-top: 5px;
+  color: #70523c;
+  font: 11px "PT Mono", monospace;
+}
+
+/* Фотографии */
+
+#app.integrated-desktop #spaceTable .desk-item.type-photo {
+  background: #f0e8d8;
+  padding: 12px 10px 18px;
+}
+
+#app.integrated-desktop #spaceTable .desk-item.type-photo::before {
+  inset: 9px 9px 43%;
+
+  background:
+    linear-gradient(130deg, #161a18a8, transparent 75%),
+    linear-gradient(
+      0deg,
+      #5b645b 0 24%,
+      #b8ae8c 25% 38%,
+      #717a6a 39% 55%,
+      #c5b997 56%
+    );
+
+  filter: sepia(0.8) grayscale(0.6);
+  border: 4px solid #c7bca5;
+  opacity: 1;
+}
+
+/* Аудиокассеты */
+
+#app.integrated-desktop #spaceTable .desk-item.type-tape {
+  height: 70%;
+  background: #31322c;
+  color: #f0ead8;
+  border: 5px solid #5c5b51;
+  border-radius: 8px;
+}
+
+#app.integrated-desktop #spaceTable .desk-item.type-tape::before {
+  inset: 15% 12% 44%;
+
+  background:
+    radial-gradient(
+      circle at 25% 50%,
+      #1b1c1a 0 18%,
+      #b9b19d 19% 27%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 75% 50%,
+      #1b1c1a 0 18%,
+      #b9b19d 19% 27%,
+      transparent 28%
+    ),
+    #b9ad8d;
+
+  border-radius: 3px;
+  opacity: 1;
+}
+
+#app.integrated-desktop #spaceTable
+.desk-item.type-tape .desk-item-title {
+  background: #333b35;
+  color: #fff2d6;
+}
+
+#app.integrated-desktop #spaceTable
+.desk-item.type-tape .desk-item-kind {
+  color: #d2c8b2;
+}
+
+/* Остальные типы находок */
+
+#app.integrated-desktop #spaceTable .desk-item.type-note {
+  background: #e7d594;
+}
+
+#app.integrated-desktop #spaceTable .desk-item.type-letter {
+  background: #dbc49b;
+}
+
+/* Новая находка */
+
+#app.integrated-desktop #spaceTable .desk-new {
+  position: absolute;
+  z-index: 3;
+
+  top: 3px;
+  left: 3px;
+  right: auto;
+
+  padding: 3px 7px;
+
+  background: #ad4536;
+  color: white;
+  border-radius: 2px;
+
+  font: 700 10px "PT Mono", monospace;
+  text-transform: uppercase;
+
+  transform: rotate(-7deg);
+}
+
+/* Если находок пока нет */
+
+#app.integrated-desktop #spaceTable .desk-empty {
+  grid-column: 1 / -1;
+  max-width: 75%;
+
+  margin: 22% 0 0;
+  padding: 18px 22px;
+
+  background: #e9d8b7;
+  color: #4c3927;
+
+  font: 21px/1.4 "Neucha", cursive;
+
+  transform: rotate(-2deg);
+  box-shadow: 4px 6px 14px #0006;
+}
+
+/* Осмотр на пергаменте справа */
+
+#app.integrated-desktop #spaceTable .desk-inspect {
+  position: absolute;
+  z-index: 1;
+
+  top: 17%;
+  left: 73.2%;
+
+  width: 24.5%;
+  height: 72%;
+  min-height: 0;
+
+  padding: 0 1.2% 2%;
+  overflow-y: auto;
+
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+
+  color: #302519 !important;
+
+  scrollbar-width: thin;
+  scrollbar-color: #b49570 transparent;
+}
+
+#app.integrated-desktop #spaceTable .desk-inspect::before {
+  content: "ОСМОТР НАХОДКИ";
+  display: block;
+
+  margin: 0 0 20px;
+  padding-bottom: 15px;
+
+  border-bottom: 1px dashed #9d7852;
+
+  color: #2b2117;
+
+  font:
+    400 clamp(19px, 2.05vw, 33px)/1.1
+    "Oranienbaum", Georgia, serif;
+
+  text-align: center;
+}
+
+#app.integrated-desktop #spaceTable .desk-inspect h3 {
+  margin: 12px 0;
+
+  color: #2b2117 !important;
+
+  font:
+    400 clamp(20px, 1.8vw, 29px)/1.15
+    "Oranienbaum", Georgia, serif;
+}
+
+#app.integrated-desktop #spaceTable .desk-inspect p {
+  margin: 9px 0 13px;
+
+  color: #3a2c1d !important;
+
+  font:
+    clamp(13px, 0.95vw, 16px)/1.5
+    "Golos Text", sans-serif;
+}
+
+#app.integrated-desktop #spaceTable .desk-inspect .muted {
+  color: #69503a !important;
+}
+
+#app.integrated-desktop #spaceTable .desk-inspect .find-tag {
+  color: #8d4a35 !important;
+
+  font:
+    600 clamp(12px, 0.85vw, 14px)
+    "PT Mono", monospace;
+}
+
+#app.integrated-desktop #spaceTable .desk-inspect .find-meta {
+  padding: 5px 0;
+
+  border-bottom: 1px solid #8d735233;
+
+  color: #382a1b !important;
+
+  font:
+    clamp(12px, 0.88vw, 14px)/1.4
+    "Golos Text", sans-serif;
+}
+
+#app.integrated-desktop #spaceTable
+.desk-inspect .find-meta span {
+  color: #875334 !important;
+  font-weight: 700;
+}
+
+/* Результат реставрации */
+
+#app.integrated-desktop #spaceTable
+.desk-inspect .desk-tools,
+#app.integrated-desktop #spaceTable
+.desk-inspect .desk-result {
+  margin: 15px 0;
+  padding: 12px;
+
+  border: 1px solid #a77c4c77;
+  border-radius: 3px;
+
+  background: #b68b5040;
+  color: #49311f;
+
+  font-size: 13px;
+}
+
+/* Кнопка запуска существующей мини-игры */
+
+#app.integrated-desktop #spaceTable .desk-inspect .btn {
+  display: block;
+  width: 100%;
+
+  margin-top: 20px;
+  padding: 12px 10px;
+
+  border: 1px solid #d08c67;
+  border-radius: 5px;
+
+  background: linear-gradient(#a64f38, #823a2c);
+  box-shadow: 0 3px 0 #532b1e;
+
+  color: #fff1dd !important;
+
+  font:
+    clamp(14px, 1.1vw, 19px)
+    "Oranienbaum", Georgia, serif;
+
+  cursor: pointer;
+}
+
+#app.integrated-desktop #spaceTable
+.desk-inspect .btn:hover {
+  filter: brightness(1.12);
+}
+
+/* Узкие экраны */
+
+@media (max-width: 950px) {
+  #app.integrated-desktop .id-table-workspace {
+    overflow-x: auto;
+  }
+
+  #app.integrated-desktop #spaceTable {
+    width: max(1050px, 100%);
+    min-height: 700px;
+  }
+
+  #app.integrated-desktop #spaceTable .desk-inspect p {
+    font-size: 14px;
+  }
+
+  #app.integrated-desktop #spaceTable .desk-inspect .find-meta {
+    font-size: 12px;
+  }
+}

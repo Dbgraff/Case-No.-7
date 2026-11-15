@@ -1,0 +1,389 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Oranienbaum&display=swap');
+
+.demo-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  overflow: auto;
+  background: #10120f;
+  color: #f5f0e7;
+  font-family: 'Manrope', sans-serif;
+  isolation: isolate;
+  animation: intro-appear 0.5s ease both;
+}
+
+.demo-intro *,
+.demo-intro *::before,
+.demo-intro *::after {
+  box-sizing: border-box;
+}
+
+.demo-intro-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+
+  background-image: url('/intro-bg.png');
+  background-size: cover;
+  background-position: center center;
+
+  animation: intro-background 14s ease-out both;
+}
+
+.demo-intro-shade {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(10, 12, 11, 0.91) 0%,
+      rgba(12, 14, 12, 0.84) 24%,
+      rgba(13, 16, 14, 0.51) 43%,
+      rgba(13, 15, 13, 0.08) 75%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(9, 11, 10, 0.58),
+      transparent 32%
+    );
+}
+
+.demo-intro-layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-height: 100dvh;
+
+  padding: 42px clamp(35px, 6.5vw, 110px) 30px;
+}
+
+/* HEADER */
+
+.demo-intro-header {
+  display: flex;
+  align-items: center;
+}
+
+.demo-intro-brand {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+}
+
+.demo-intro-emblem {
+  display: block;
+  width: 98px;
+  height: 98px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.demo-intro-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-left: 22px;
+  border-left: 1px solid rgba(224, 198, 159, 0.48);
+}
+
+.demo-intro-brand-title {
+  color: #f4eee4;
+  font-size: clamp(19px, 2vw, 27px);
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+.demo-intro-brand-subtitle {
+  color: #d1c2ae;
+  font-size: clamp(14px, 1.2vw, 17px);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* MAIN CONTENT */
+
+.demo-intro-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 60px 0 85px;
+  max-width: 790px;
+}
+
+.demo-intro-title {
+  margin: 0;
+
+  font-family: 'Oranienbaum', Georgia, serif;
+  font-size: clamp(90px, 10vw, 165px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+
+  color: #f4ede0;
+  text-shadow: 0 5px 30px rgba(0, 0, 0, 0.35);
+}
+
+.demo-intro-title span {
+  color: #d0a16b;
+  white-space: nowrap;
+}
+
+.demo-intro-divider {
+  width: 330px;
+  max-width: 65%;
+  height: 2px;
+
+  margin: 25px 0 34px;
+
+  background: linear-gradient(
+    90deg,
+    #d4aa76,
+    rgba(212, 170, 118, 0.05)
+  );
+}
+
+.demo-intro-tagline {
+  max-width: 600px;
+  margin: 0 0 58px;
+
+  color: #e0d4c5;
+  font-size: clamp(19px, 2vw, 25px);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.015em;
+}
+
+
+
+/* BUTTONS — REAL PAPER TEXTURES */
+
+.demo-intro-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  width: min(100%, 430px);
+}
+
+.demo-intro-button {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 78px;
+  padding: 0 35px;
+
+  border: none;
+  border-radius: 0;
+
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+
+  font-family: 'Manrope', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Отключаем старые CSS-текстуры */
+.demo-intro-button::before,
+.demo-intro-button::after {
+  content: none;
+}
+
+/* Светлая архивная бумага */
+.demo-intro-button-primary {
+  background-image: url('/intro-paper-light.png');
+  color: #33271c;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+/* Тёмная состаренная бумага */
+.demo-intro-button-secondary {
+  background-image: url('/intro-paper-dark.png');
+  color: #e6c69d;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+/* Наведение */
+.demo-intro-button:not(:disabled):hover {
+  transform: translateX(5px);
+  filter: brightness(1.1);
+}
+
+.demo-intro-button:active:not(:disabled) {
+  transform: translateX(2px) scale(0.99);
+}
+
+.demo-intro-button:focus-visible {
+  outline: 2px solid #e8c796;
+  outline-offset: 3px;
+}
+
+.demo-intro-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.demo-intro-arrow {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.demo-intro-save {
+  margin: 22px 0 0;
+  color: #e1c6a4;
+  font-size: 15px;
+}
+
+/* FOOTER */
+
+.demo-intro-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  width: min(100%, 720px);
+  padding-top: 20px;
+
+  border-top: 1px solid rgba(220, 196, 164, 0.42);
+
+  color: #c7b8a5;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+/* ANIMATION */
+
+.demo-intro-leaving {
+  pointer-events: none;
+  animation: intro-leave 0.35s ease forwards;
+}
+
+@keyframes intro-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes intro-leave {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes intro-background {
+  from { transform: scale(1.055); }
+  to { transform: scale(1); }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .demo-intro-shade {
+    background: linear-gradient(
+      90deg,
+      rgba(10, 12, 11, 0.94),
+      rgba(10, 12, 11, 0.7) 70%,
+      rgba(10, 12, 11, 0.35)
+    );
+  }
+
+  .demo-intro-title {
+    font-size: clamp(75px, 11vw, 110px);
+  }
+
+  .demo-intro-content {
+    padding: 75px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .demo-intro-layout {
+    padding: 25px 22px;
+  }
+
+  .demo-intro-background {
+    background-position: 62% center;
+  }
+
+  .demo-intro-brand {
+    gap: 12px;
+  }
+
+  .demo-intro-emblem {
+    width: 62px;
+    height: 62px;
+  }
+
+  .demo-intro-brand-copy {
+    padding-left: 13px;
+    gap: 5px;
+  }
+
+  .demo-intro-brand-title {
+    font-size: 17px;
+  }
+
+  .demo-intro-brand-subtitle {
+    font-size: 12px;
+  }
+
+  .demo-intro-content {
+    padding: 70px 0;
+  }
+
+  .demo-intro-title {
+    font-size: clamp(64px, 13vw, 88px);
+  }
+
+  .demo-intro-tagline {
+    font-size: 19px;
+    margin-bottom: 38px;
+  }
+
+  .demo-intro-button {
+    min-height: 65px;
+    padding: 0 22px;
+    font-size: 17px;
+  }
+
+  .demo-intro-footer {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-intro,
+  .demo-intro-background,
+  .demo-intro-leaving {
+    animation: none;
+  }
+
+  .demo-intro-button {
+    transition: none;
+  }
+}

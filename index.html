@@ -1,120 +1,348 @@
+
 <!doctype html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
     <title>Дело № 7 · Штаб</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Neucha&family=Oranienbaum&family=PT+Mono&display=swap"
       rel="stylesheet"
     />
+
+    <style>
+      .brand .chev {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .brand .chev img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: 48px;
+        max-height: 48px;
+        object-fit: contain;
+      }
+    </style>
   </head>
+
   <body>
     <div id="app">
       <header class="topbar">
         <div class="brand">
-          <div class="chev">81</div>
+          <div class="chev">
+            <img
+              src="/zapad81.png"
+              alt="Эмблема ВТСО Запад-81"
+            />
+          </div>
+
           <div>
             <h1>Штаб · Дело № 7</h1>
-            <p class="sub">ВТСО «Запад-81» · лагерь «Ракета»</p>
+            <p class="sub">
+              ВТСО «Запад-81» · лагерь «Ракета»
+            </p>
           </div>
         </div>
+
         <div class="resources">
-          <div class="res"><span>День</span><b id="day">1</b></div>
-          <div class="res"><span>До заката</span><b id="hours">5 ч</b></div>
-          <button type="button" id="btnSkipTutorial" class="btn ghost" hidden>Пропустить обучение</button>
+          <div class="res">
+            <span>День</span>
+            <b id="day">1</b>
+          </div>
+
+          <div class="res">
+            <span>До заката</span>
+            <b id="hours">5 ч</b>
+          </div>
+
+          <button
+            type="button"
+            id="btnSkipTutorial"
+            class="btn ghost"
+            hidden
+          >
+            Пропустить обучение
+          </button>
         </div>
       </header>
 
       <nav class="spaces" id="spaces">
-        <button type="button" data-space="computer" class="on">Компьютер</button>
-        <button type="button" data-space="table">Стол реставрации</button>
+        <button
+          type="button"
+          data-space="computer"
+          class="on"
+        >
+          Компьютер
+        </button>
+
+        <button
+          type="button"
+          data-space="table"
+        >
+          Стол реставрации
+        </button>
       </nav>
 
-      <!-- Space 1: computer -->
+      <!-- Рабочее пространство: компьютер -->
+
       <div class="space" id="spaceComputer">
-      <div class="goalbar">
-        <span class="label">Цель 1 из 3</span>
-        <span id="goalText">Где жила «Искра»?</span>
-      </div>
-
-      <nav class="tabs" id="tabs">
-        <button type="button" data-tab="hq" class="on">Связь</button>
-        <button type="button" data-tab="archive">Архив</button>
-        <button type="button" data-tab="case">Дело</button>
-      </nav>
-
-      <main class="workspace">
-        <!-- HQ: radio + Pixi map -->
-        <section class="pane on" data-pane="hq">
-          <div class="hq-grid">
-            <div class="radio">
-              <div class="label">Рация группы</div>
-              <div class="chat" id="chat"></div>
-            </div>
-            <div class="map-wrap">
-              <div class="label">Карта лагеря · видеосвязь</div>
-              <div id="pixi-host"></div>
-              <div class="map-actions">
-                <button type="button" id="btnSend" class="btn" disabled>Отправить группу · 1 ч</button>
-                <button type="button" id="btnEndDay" class="btn ghost">Завершить день</button>
-                <span id="placeLabel" class="muted">место не выбрано</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Archive placeholder -->
-        <section class="pane" data-pane="archive" hidden>
-          <div class="arch">
-            <aside class="arch-side">
-              <div class="qrow">
-                <input id="archQ" type="search" placeholder="Поиск по архиву клуба…" autocomplete="off" />
-                <button type="button" id="archQGo" class="btn">Найти</button>
-              </div>
-              <div class="label">Быстрый поиск</div>
-              <div id="archWords" class="chips"></div>
-              <div class="label">Результаты</div>
-              <div id="archHits" class="hits"></div>
-              <div id="archClues" class="arch-clues"></div>
-            </aside>
-            <div id="archDoc" class="arch-doc">
-              <p class="muted">Найдите документ слева. Начните, например, со слова «ракета».</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="pane" data-pane="case" hidden>
-          <div class="case-board">
-            <div class="case-slots" id="caseSlots"></div>
-            <div class="case-side">
-              <div class="label">Карточки</div>
-              <div id="caseCards" class="case-cards"></div>
-              <p id="caseHint" class="muted">
-                Карточки появляются после реставрации находок. Перетащите или нажмите слот, затем карточку.
-              </p>
-              <button type="button" id="btnReport" class="btn" disabled>
-                Доложить командиру
-              </button>
-              <p id="caseReportMsg" class="muted"></p>
-            </div>
-          </div>
-        </section>
-      </main>
-      </div>
-
-      <!-- Space 2: physical restoration table -->
-      <section class="space desk" id="spaceTable" hidden>
-        <div class="desk-top">
-          <span class="label">Реставрационный стол</span>
+        <div class="goalbar">
+          <span class="label">Цель 1 из 3</span>
+          <span id="goalText">
+            Где жила «Искра»?
+          </span>
         </div>
-        <div class="desk-surface" id="deskItems"></div>
-        <div class="desk-inspect" id="deskInspect"></div>
+
+        <nav class="tabs" id="tabs">
+          <button
+            type="button"
+            data-tab="hq"
+            class="on"
+          >
+            Связь
+          </button>
+
+          <button
+            type="button"
+            data-tab="archive"
+          >
+            Архив
+          </button>
+
+          <button
+            type="button"
+            data-tab="case"
+          >
+            Дело
+          </button>
+        </nav>
+
+        <main class="workspace">
+          <!-- Связь с группой и карта -->
+
+          <section
+            class="pane on"
+            data-pane="hq"
+          >
+            <div class="hq-grid">
+              <div class="radio">
+                <div class="label">
+                  Рация группы
+                </div>
+
+                <div
+                  class="chat"
+                  id="chat"
+                ></div>
+              </div>
+
+              <div class="map-wrap">
+                <div class="label">
+                  Карта лагеря · видеосвязь
+                </div>
+
+                <div id="pixi-host"></div>
+
+                <div class="map-actions">
+                  <button
+                    type="button"
+                    id="btnSend"
+                    class="btn"
+                    disabled
+                  >
+                    Отправить группу · 1 ч
+                  </button>
+
+                  <button
+                    type="button"
+                    id="btnEndDay"
+                    class="btn ghost"
+                  >
+                    Завершить день
+                  </button>
+
+                  <span
+                    id="placeLabel"
+                    class="muted"
+                  >
+                    место не выбрано
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Электронный архив -->
+
+          <section
+            class="pane"
+            data-pane="archive"
+            hidden
+          >
+            <div class="arch">
+              <aside class="arch-side">
+                <div class="qrow">
+                  <input
+                    id="archQ"
+                    type="search"
+                    placeholder="Поиск по документам…"
+                    autocomplete="off"
+                  />
+
+                  <button
+                    type="button"
+                    id="archQGo"
+                    class="btn"
+                  >
+                    Найти
+                  </button>
+                </div>
+
+                <div class="label">
+                  Быстрый поиск
+                </div>
+
+                <div
+                  id="archWords"
+                  class="chips"
+                ></div>
+
+                <div class="label">
+                  Результаты
+                </div>
+
+                <div
+                  id="archHits"
+                  class="hits"
+                ></div>
+
+                <div
+                  id="archClues"
+                  class="arch-clues"
+                ></div>
+              </aside>
+
+              <div
+                id="archDoc"
+                class="arch-doc"
+              >
+                <p class="muted">
+                  Найдите документ слева.
+                  Начните, например, со слова «ракета».
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Доска расследования -->
+
+          <section
+            class="pane"
+            data-pane="case"
+            hidden
+          >
+            <div class="case-board">
+              <div
+                class="case-slots"
+                id="caseSlots"
+              ></div>
+
+              <div class="case-side">
+                <div class="label">
+                  Карточки
+                </div>
+
+                <div
+                  id="caseCards"
+                  class="case-cards"
+                ></div>
+
+                <p
+                  id="caseHint"
+                  class="muted"
+                >
+                  Карточки появляются после реставрации
+                  находок. Перетащите или нажмите слот,
+                  затем карточку.
+                </p>
+
+                <button
+                  type="button"
+                  id="btnReport"
+                  class="btn"
+                  disabled
+                >
+                  Доложить командиру
+                </button>
+
+                <p
+                  id="caseReportMsg"
+                  class="muted"
+                ></p>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <!-- Рабочее пространство: реставрационный стол -->
+
+      <section
+        class="space desk"
+        id="spaceTable"
+        hidden
+      >
+        <div class="desk-top">
+          <span class="label">
+            Реставрационный стол
+          </span>
+        </div>
+
+        <div
+          class="desk-surface"
+          id="deskItems"
+        ></div>
+
+        <div
+          class="desk-inspect"
+          id="deskInspect"
+        ></div>
       </section>
     </div>
 
-    <script type="module" src="/src/main.ts"></script>
+    <!-- Основная игровая логика -->
+
+    <script
+      type="module"
+      src="/src/main.ts"
+    ></script>
+
+    <!-- Стартовый экран демо -->
+
+    <script
+      type="module"
+      src="/src/demo/intro.ts"
+    ></script>
   </body>
 </html>

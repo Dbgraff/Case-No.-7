@@ -12,11 +12,10 @@ import { initCampMap, type CampMap } from "./map/campMap";
 import { bindArchive } from "./ui/computer/archive";
 import { startTutorial } from "./game/tutorial";
 import { isTutorialRunning } from "./game/tutorial/steps";
-import { TUTORIAL_INTRO } from "./data/tutorial";
 import { bindTutorial } from "./ui/computer/tutorial";
 import { bindCaseBoard } from "./ui/computer/caseBoard";
 import { initIntegratedDesktop } from "./ui/integratedDesktop";
-import { initStory } from "./game/story";
+import { initStory, queueStoryMessage } from "./game/story";
 
 let selected: Place | null = null;
 let campMap: CampMap | null = null;
@@ -29,7 +28,8 @@ function placeName(id: string): string {
   return PLACES.find(p => p.id === id)?.name ?? id;
 }
 function refreshSendButton(): void {
-  btnSend.disabled = !selected || getState().hoursLeft < GROUP_TRIP_COST_HOURS;
+  btnSend.disabled = !selected || isTutorialRunning(getState().tutorialStep) || getState().hoursLeft < GROUP_TRIP_COST_HOURS;
+  btnEndDay.disabled = isTutorialRunning(getState().tutorialStep);
 }
 function selectPlace(place: Place | null): void {
   selected = place;
@@ -46,7 +46,7 @@ function scheduleArrival(name: string): void {
   const arrival: PendingArrival = { timer: 0, deliver: () => {} };
   arrival.deliver = () => {
     pendingArrivals.delete(arrival);
-    notify("Даша", `Прибыли к «${name}». Приём.`);
+    queueStoryMessage("Даша", `Прибыли к «${name}». Приём.`);
     if (pendingArrivals.size === 0 && getState().hoursLeft === 0) {
       notify("Система", "Время на вылазку вышло. Завершите день, чтобы продолжить расследование утром.", "sys");
     }
@@ -62,7 +62,7 @@ function flushArrivals(): void {
 }
 
 btnSend.addEventListener("click", () => {
-  if (!selected || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
+  if (!selected || isTutorialRunning(getState().tutorialStep) || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
   const state = getState();
   const target = selected;
   // story.ts listens for new visits and delivers finds immediately.
@@ -72,23 +72,24 @@ btnSend.addEventListener("click", () => {
     groupPlaceId: target.id,
   });
   campMap?.setGroupPlace(target.id);
-  notify("Даша", `Идём к «${target.name}». Приём.`);
-  notify("Артём", "Приняли. Выдвигаемся.");
+  queueStoryMessage("Даша", `Идём к «${target.name}». Приём.`);
+  queueStoryMessage("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
   scheduleArrival(target.name);
 });
 
 function reportDay(report: DayReport): void {
-  if (report.endedDay === 1) notify("Система", "Вылазка завершена. Началось утро ответов.", "sys");
+  if (report.endedDay === 1) queueStoryMessage("Система", "Вылазка завершена. Началось утро ответов.", "sys");
   if (report.endedDay === 1) {
-    notify("Даша", "Штаб, на сегодня вылазка закончена. Материалы, которые успели найти, уже на реставрационном столе.");
-    notify("Система", "Наступило утро ответов. Поиск «запрос» в АРХИВЕ-81 откроет форму военного архива.", "story");
+    queueStoryMessage("Даша", "Штаб, на сегодня вылазка закончена. Найденные материалы уже на реставрационном столе.");
+    queueStoryMessage("Система", "Утро ответов. Поиск «запрос» в АРХИВЕ-81 откроет форму военного архива.", "story");
   } else {
-    notify("Система", "Работа второго дня продлена. Можно завершить недостающие поисковые задания.", "sys");
+    queueStoryMessage("Система", "Работа второго дня продлена. Можно завершить поисковые задания.", "sys");
   }
-  notify("Система", `День ${report.newDay}. Доступно ${HOURS_PER_DAY} ч.`, "sys");
+  queueStoryMessage("Система", `День ${report.newDay}. Доступно ${HOURS_PER_DAY} ч.`, "sys");
 }
 btnEndDay.addEventListener("click", () => {
+  if (isTutorialRunning(getState().tutorialStep)) return;
   flushArrivals();
   const report = endDay();
   selectPlace(null);
@@ -104,16 +105,10 @@ subscribe(refreshSendButton);
 bindArchive();
 bindCaseBoard();
 
+// The story opens with Galina, then the training, then delayed field messages.
 if (startTutorial()) addTableNews(1);
-if (isTutorialRunning(getState().tutorialStep)) {
-  notify(TUTORIAL_INTRO.who, TUTORIAL_INTRO.text);
-} else if (getState().day === 1 && getState().visits.length === 0) {
-  notify("Даша", "Штаб, мы у ворот «Ракеты». Корпуса 1, 2 и 4 — третьего нет. Где размещалась «Искра» в 1975-м?");
-}
-bindTutorial();
-
 initIntegratedDesktop();
-initStory();
+initStory(bindTutorial);
 
 initCampMap(document.getElementById("pixi-host")!, PLACES, {
   onSelect: place => {

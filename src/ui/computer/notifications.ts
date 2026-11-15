@@ -2,127 +2,130 @@ import { say, type ChatKind } from "./chat";
 import { getActiveSpace, onSpaceChange, showSpace } from "../spaces";
 import { getActiveTab, onTabChange, showTab } from "./tabs";
 
-/** Id of the tab that contains the chat. */
 const CHAT_TAB = "hq";
-
-/** How long a pop-up stays on screen, ms. */
-const TOAST_LIFETIME_MS = 6000;
-
-/** Maximum number of pop-ups shown at the same time. */
+const TOAST_LIFETIME_MS = 6500;
 const MAX_TOASTS = 4;
 
 let unread = 0;
-let badgeEl: HTMLElement | null = null;
+let tabBadge: HTMLElement | null = null;
+let dockBadge: HTMLElement | null = null;
 let toastsEl: HTMLElement | null = null;
 
-/**
- * Creates the unread badge on the chat tab button and the pop-up container.
- * Must be called once at startup, after `initTabs()`.
- * @returns {void}
- */
+/** In the new desktop, the chat is in its own window, not an HQ tab. */
+function isChatVisible(): boolean {
+  if (document.visibilityState === "hidden" || getActiveSpace() !== "computer") return false;
+  const chat = document.getElementById("chat");
+  const desktopWindow = chat?.closest<HTMLElement>(".desktop-window");
+  if (desktopWindow) {
+    const style = window.getComputedStyle(desktopWindow);
+    const box = desktopWindow.getBoundingClientRect();
+    if (style.display === "none" || style.visibility === "hidden" || box.width === 0 || box.height === 0) return false;
+
+    // A chat window hidden behind the browser is not a read message.
+    const otherWindows = document.querySelectorAll<HTMLElement>(".desktop-window");
+    const chatZ = Number(style.zIndex) || 0;
+    for (const other of otherWindows) {
+      if (other === desktopWindow || other.hidden) continue;
+      if (window.getComputedStyle(other).display === "none") continue;
+      if ((Number(window.getComputedStyle(other).zIndex) || 0) > chatZ) return false;
+    }
+    return true;
+  }
+  return getActiveTab() === CHAT_TAB;
+}
+
+function ensureDockBadge(): void {
+  if (dockBadge?.isConnected) return;
+  const button = document.querySelector<HTMLElement>('.dock-item[data-open="chat"]');
+  if (!button) return;
+  dockBadge = document.createElement("span");
+  dockBadge.className = "tab-badge";
+  dockBadge.hidden = true;
+  dockBadge.setAttribute("aria-label", "Непрочитанные сообщения");
+  button.appendChild(dockBadge);
+}
+
+function renderBadge(): void {
+  ensureDockBadge();
+  for (const el of [tabBadge, dockBadge]) {
+    if (!el) continue;
+    el.hidden = unread === 0;
+    el.textContent = String(unread);
+  }
+}
+
+function clearWhenVisible(): void {
+  if (!isChatVisible()) return;
+  unread = 0;
+  renderBadge();
+}
+
 export function initNotifications(): void {
   const chatTabBtn = document.querySelector<HTMLButtonElement>(
     `#tabs button[data-tab="${CHAT_TAB}"]`,
   );
   if (chatTabBtn) {
-    badgeEl = document.createElement("span");
-    badgeEl.className = "tab-badge";
-    badgeEl.hidden = true;
-    chatTabBtn.appendChild(badgeEl);
+    tabBadge = document.createElement("span");
+    tabBadge.className = "tab-badge";
+    tabBadge.hidden = true;
+    chatTabBtn.appendChild(tabBadge);
   }
 
   toastsEl = document.createElement("div");
   toastsEl.className = "toasts";
   document.body.appendChild(toastsEl);
 
-  const resetIfChatVisible = (): void => {
-    if (isChatVisible()) {
-      unread = 0;
-      renderBadge();
+  onTabChange(clearWhenVisible);
+  onSpaceChange(clearWhenVisible);
+  document.addEventListener("click", event => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest('.dock-item[data-open="chat"], .window-chat')) {
+      // The desktop may open its chat on the same click. Check afterward.
+      window.setTimeout(clearWhenVisible, 0);
     }
-  };
-  onTabChange(resetIfChatVisible);
-  onSpaceChange(resetIfChatVisible);
+  });
+  document.addEventListener("visibilitychange", clearWhenVisible);
 }
 
-/**
- * Tells whether the chat is on screen right now (computer space, chat tab).
- * @returns {boolean} `true` if the player can see the chat.
- */
-function isChatVisible(): boolean {
-  return getActiveSpace() === "computer" && getActiveTab() === CHAT_TAB;
-}
-
-/**
- * Shows the current unread count on the chat tab button.
- * @returns {void}
- */
-function renderBadge(): void {
-  if (!badgeEl) return;
-  badgeEl.hidden = unread === 0;
-  badgeEl.textContent = String(unread);
-}
-
-/**
- * Returns the letter shown in a pop-up avatar.
- * @param {string} who - Sender name.
- * @param {ChatKind} kind - Message kind.
- * @returns {string} One character.
- */
-function avatarChar(who: string, kind: ChatKind): string {
-  if (kind === "sys") return "i";
-  return who.trim().charAt(0).toUpperCase() || "?";
-}
-
-/**
- * Shows a messenger-style pop-up in the bottom-right corner: avatar, sender,
- * text and a close button. Clicking the pop-up opens the chat tab.
- * @param {string} who - Sender shown in bold.
- * @param {string} text - Message text.
- * @param {ChatKind} kind - Message kind (affects the style).
- * @returns {void}
- */
 function showToast(who: string, text: string, kind: ChatKind): void {
   if (!toastsEl) return;
   const toast = document.createElement("div");
-  toast.className = "toast" + (kind ? " " + kind : "");
+  toast.className = `toast${kind ? ` ${kind}` : ""}`;
 
-  const ava = document.createElement("div");
-  ava.className = "toast-ava";
-  ava.textContent = avatarChar(who, kind);
+  const avatar = document.createElement("div");
+  avatar.className = "toast-ava";
+  avatar.textContent = kind === "sys" ? "i" : who.trim().charAt(0).toUpperCase() || "?";
 
-  const body = document.createElement("div");
-  body.className = "toast-body";
+  const content = document.createElement("div");
+  content.className = "toast-body";
   const name = document.createElement("b");
   name.textContent = who;
-  const msg = document.createElement("span");
-  msg.textContent = text;
-  body.appendChild(name);
-  body.appendChild(msg);
+  const message = document.createElement("span");
+  message.textContent = text;
+  content.append(name, message);
 
   const close = document.createElement("button");
   close.type = "button";
   close.className = "toast-close";
-  close.setAttribute("aria-label", "Закрыть");
   close.textContent = "×";
+  close.setAttribute("aria-label", "Закрыть уведомление");
+  toast.append(avatar, content, close);
 
-  toast.appendChild(ava);
-  toast.appendChild(body);
-  toast.appendChild(close);
-
-  /** Fades the pop-up out and removes it. */
+  let removing = false;
   const remove = (): void => {
+    if (removing) return;
+    removing = true;
     toast.classList.add("out");
     window.setTimeout(() => toast.remove(), 250);
   };
-  close.addEventListener("click", (e) => {
-    e.stopPropagation();
-    remove();
-  });
+  close.addEventListener("click", event => { event.stopPropagation(); remove(); });
   toast.addEventListener("click", () => {
     showSpace("computer");
     showTab(CHAT_TAB);
+    document.querySelector<HTMLButtonElement>('.dock-item[data-open="chat"]')?.click();
     remove();
+    window.setTimeout(clearWhenVisible, 50);
   });
 
   toastsEl.appendChild(toast);
@@ -130,18 +133,13 @@ function showToast(who: string, text: string, kind: ChatKind): void {
   window.setTimeout(remove, TOAST_LIFETIME_MS);
 }
 
-/**
- * Delivers a game message to the player. It always goes into the chat. If the
- * chat is not on screen, the message also shows a pop-up in the bottom-right
- * corner and increases the unread badge on the chat tab.
- * @param {string} who - Sender name.
- * @param {string} text - Message text.
- * @param {ChatKind} [kind=""] - "" regular, "sys" system, "story" important.
- * @returns {void}
- */
+/** All messages are delivered to chat; hidden messages receive badges + toast. */
 export function notify(who: string, text: string, kind: ChatKind = ""): void {
   say(who, text, kind);
-  if (isChatVisible()) return;
+  if (isChatVisible()) {
+    clearWhenVisible();
+    return;
+  }
   unread++;
   renderBadge();
   showToast(who, text, kind);

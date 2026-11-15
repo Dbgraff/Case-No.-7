@@ -20,6 +20,8 @@ import { isTutorialRunning } from "./game/tutorial/steps";
 import { TUTORIAL_INTRO } from "./data/tutorial";
 import { bindTutorial } from "./ui/computer/tutorial";
 import { bindCaseBoard } from "./ui/computer/caseBoard";
+import { initDeskLayout } from "./ui/table/deskLayout";
+import { initIntegratedDesktop } from "./ui/integratedDesktop";
 
 /** Place currently chosen on the map (not yet visited). */
 let selected: Place | null = null;
@@ -165,6 +167,7 @@ initSpaces();
 initNotifications();
 bindTopbar();
 bindFinds();
+initDeskLayout();
 subscribe(refreshSendButton);
 bindArchive();
 bindCaseBoard();
@@ -184,6 +187,7 @@ if (isTutorialRunning(getState().tutorialStep)) {
   );
 }
 bindTutorial();
+initIntegratedDesktop();
 
 initCampMap(document.getElementById("pixi-host")!, PLACES, {
   onSelect: (p) => {

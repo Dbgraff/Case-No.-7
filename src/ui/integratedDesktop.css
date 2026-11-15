@@ -1,0 +1,456 @@
+
+/* INTEGRATED GAME DESKTOP */
+
+html,
+body {
+  min-height: 100%;
+}
+
+#app.integrated-desktop {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  padding: 0;
+  margin: 0;
+}
+
+.id-shell {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #17243b;
+  font-family: "Golos Text", sans-serif;
+}
+
+.id-shell [hidden] {
+  display: none !important;
+}
+
+/* MENU BAR */
+
+.id-menubar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  min-height: 54px;
+  padding: 7px 25px;
+
+  background: rgba(18, 29, 48, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f0f2f6;
+}
+
+.id-menu-brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  white-space: nowrap;
+}
+
+.id-menu-brand img {
+  width: 37px;
+  height: 37px;
+  object-fit: contain;
+}
+
+.id-menu-brand strong {
+  font-size: 17px;
+}
+
+.id-menu-brand > span {
+  color: #c0ccda;
+  font-size: 13px;
+}
+
+.id-menu-status .topbar {
+  padding: 0;
+  gap: 10px;
+}
+
+.id-menu-status .brand {
+  display: none;
+}
+
+.id-menu-status .resources {
+  align-items: center;
+  gap: 25px;
+}
+
+.id-menu-status .res {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.id-menu-status .res span {
+  color: #b6c6da;
+  font-size: 12px;
+}
+
+.id-menu-status .res b {
+  font-family: "Golos Text", sans-serif;
+  font-size: 17px;
+  color: #f4e9d9;
+}
+
+/* MONITOR */
+
+.id-screen {
+  position: relative;
+  min-height: calc(100dvh - 54px);
+}
+
+.id-monitor {
+  position: relative;
+  min-height: calc(100dvh - 54px);
+  padding: 65px 105px 125px 35px;
+
+  background:
+    radial-gradient(
+      ellipse at 12% 90%,
+      rgba(115, 157, 204, 0.8),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse at 87% 5%,
+      rgba(132, 160, 210, 0.65),
+      transparent 48%
+    ),
+    linear-gradient(135deg, #1c355b, #5679a4 65%, #253a5d);
+}
+
+.id-desktop-shortcuts {
+  position: absolute;
+  right: 20px;
+  top: 35px;
+  display: grid;
+  gap: 14px;
+}
+
+.id-desktop-shortcuts button {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+
+  width: 77px;
+  padding: 9px 4px;
+
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: white;
+
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.id-desktop-shortcuts button:hover,
+.id-desktop-shortcuts button.selected {
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.id-shortcut-icon {
+  display: grid;
+  place-items: center;
+  width: 51px;
+  height: 51px;
+
+  border-radius: 13px;
+  background: linear-gradient(140deg, #e2bf8c, #a87948);
+  color: #fff8ea;
+  box-shadow: 0 6px 17px rgba(12, 22, 37, 0.3);
+
+  font-size: 26px;
+}
+
+.id-window {
+  width: min(1150px, 100%);
+  min-height: 570px;
+  margin: 0 auto;
+
+  background: #f5f6f7;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 13px;
+  overflow: hidden;
+
+  box-shadow:
+    0 26px 75px rgba(7, 17, 32, 0.46),
+    0 5px 15px rgba(7, 17, 32, 0.15);
+}
+
+.id-window-titlebar {
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  height: 45px;
+  background: #e8ebef;
+  border-bottom: 1px solid #d5dce5;
+
+  color: #5c6876;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.id-window-controls {
+  position: absolute;
+  left: 18px;
+  display: flex;
+  gap: 8px;
+}
+
+.id-window-controls i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ff6059;
+}
+
+.id-window-controls i:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.id-window-controls i:nth-child(3) {
+  background: #28c840;
+}
+
+.id-window-body {
+  padding: 18px;
+  background: #20251f;
+}
+
+.id-window-body #spaceComputer {
+  width: 100%;
+  min-height: 500px;
+}
+
+.id-window-body .goalbar {
+  border-radius: 5px 5px 0 0;
+}
+
+.id-window-body .workspace {
+  min-height: 490px;
+}
+
+.id-window-body .tabs {
+  display: none;
+}
+
+.id-window-body .pane {
+  min-height: 480px;
+}
+
+.id-window-body .hq-grid {
+  min-height: 460px;
+}
+
+/* RESTORATION DESK */
+
+.id-table-view {
+  position: relative;
+  min-height: calc(100dvh - 54px);
+  padding: 32px clamp(20px, 4vw, 65px) 120px;
+
+  background:
+    linear-gradient(
+      rgba(19, 14, 10, 0.2),
+      rgba(19, 14, 10, 0.12)
+    ),
+    url("/restoration-desk.png") center / cover no-repeat;
+}
+
+.id-table-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  max-width: 1440px;
+  margin: 0 auto 22px;
+
+  color: #f6e8d3;
+  text-shadow: 0 2px 9px #0009;
+}
+
+.id-table-caption span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.id-table-caption h2 {
+  margin: 7px 0 0;
+  font-family: "Oranienbaum", Georgia, serif;
+  font-size: clamp(34px, 4vw, 57px);
+  font-weight: 400;
+}
+
+.id-table-content {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Restyling the existing table without touching its logic */
+
+.id-table-content #spaceTable {
+  background: rgba(20, 23, 19, 0.69);
+  border: 1px solid rgba(227, 190, 141, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 20px 65px #0008;
+  backdrop-filter: blur(9px);
+}
+
+.id-table-content #spaceTable.desk-redesign {
+  background: rgba(20, 23, 19, 0.65);
+}
+
+.id-table-content .desk-preview {
+  background:
+    linear-gradient(
+      rgba(23, 29, 22, 0.2),
+      rgba(23, 29, 22, 0.35)
+    );
+}
+
+.id-table-content .desk-preview-workarea {
+  background: rgba(35, 46, 34, 0.24);
+}
+
+.id-table-content .desk-items-panel,
+.id-table-content .desk-inspect-panel {
+  background: rgba(19, 20, 17, 0.82);
+}
+
+/* DOCK */
+
+.id-dock {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px;
+  background: rgba(25, 32, 42, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+
+  box-shadow: 0 12px 35px #0006;
+  backdrop-filter: blur(18px);
+}
+
+.id-dock button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 51px;
+  padding: 10px 18px;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: transparent;
+  color: #e5eaf1;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.id-dock button span {
+  font-size: 23px;
+}
+
+.id-dock button.active {
+  background: rgba(255, 255, 255, 0.19);
+  color: white;
+}
+
+.id-dock button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.id-original-spaces {
+  display: none !important;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+  .id-menu-brand > span {
+    display: none;
+  }
+
+  .id-monitor {
+    padding: 95px 12px 120px;
+  }
+
+  .id-desktop-shortcuts {
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 4px;
+  }
+
+  .id-desktop-shortcuts button {
+    width: 75px;
+  }
+
+  .id-shortcut-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+
+  .id-window-body {
+    padding: 8px;
+  }
+
+  .id-table-caption > span {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .id-menubar {
+    padding: 8px 12px;
+  }
+
+  .id-menu-brand img {
+    width: 29px;
+    height: 29px;
+  }
+
+  .id-menu-status .resources {
+    gap: 10px;
+  }
+
+  .id-menu-status .res span {
+    display: none;
+  }
+
+  .id-dock {
+    width: calc(100% - 24px);
+  }
+
+  .id-dock button {
+    flex: 1;
+    justify-content: center;
+    padding: 9px;
+    font-size: 13px;
+  }
+}

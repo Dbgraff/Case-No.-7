@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Дело № 7 — тест аудиореставрации</title>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;700&family=Oranienbaum&family=PT+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root{--sheet:#e6dcc4;--ink:#312f25;--muted:#766d59;--rule:#b9ac8f;--paper-ink:#312f25;--thread:#60755c;--f-display:'Oranienbaum',Georgia,serif;--f-mono:'PT Mono',monospace}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 70% 18%,#324138 0,transparent 50%),linear-gradient(135deg,#111918,#24302a);color:#efe9d7;font-family:'Golos Text',sans-serif}
+    .shell{max-width:1020px;margin:auto;padding:55px 25px}
+    .eyebrow{letter-spacing:.2em;color:#bbbc9b;font:12px var(--f-mono)}
+    h1{font:normal clamp(32px,5vw,58px) var(--f-display)}
+    .lead{max-width:760px;line-height:1.75;color:#d2d6ca}
+    .panel{background:#e2d7bd;border:1px solid #647266;padding:25px;margin-top:32px;border-radius:5px;color:#342d21}
+    .tape{max-width:610px;border:9px solid #343b37;background:linear-gradient(#c8bfa8,#b8ae96);border-radius:15px;padding:25px;margin:18px 0}
+    .tape-label{background:#eee8da;padding:12px;text-align:center;letter-spacing:.12em;font:14px var(--f-mono)}
+    .reels{display:flex;justify-content:space-around;background:#4c514c;padding:18px;margin-top:10px}
+    .reel{width:85px;aspect-ratio:1;border:13px solid #a5a495;background:radial-gradient(circle,#222a27 0 18%,#dddace 20% 34%,#6a6e65 35%);border-radius:50%}
+    .row,.map-actions{display:flex;flex-wrap:wrap;gap:10px}
+    button{cursor:pointer;padding:12px 18px;font:14px var(--f-mono);background:#61795d;border:1px solid #66775e;border-radius:3px;color:#fff}
+    button.secondary{background:transparent;color:#374b39}
+    .muted{color:#6d6d60;font:13px/1.65 var(--f-mono)}
+    #status{margin-top:20px;color:#325c35;min-height:20px}
+    .restore-overlay{position:fixed;inset:0;z-index:900;display:grid;place-items:center;padding:16px;background:rgba(10,12,9,.82)}
+    .restore-dialog{display:flex;flex-direction:column;gap:10px;width:min(620px,100%);max-height:100%;overflow:auto;padding:20px;background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:6px;box-shadow:0 20px 100px #0009}
+    .restore-dialog h3{margin:0;font:normal 23px var(--f-display)}
+    .restore-dialog p{margin:0}
+    .restore-dialog .muted{color:var(--muted)}
+    .restore-dialog .label{font:12px var(--f-mono);letter-spacing:.07em;color:#675a42;text-transform:uppercase}
+    .restore-dialog .audio-wave{display:block;width:100%;height:80px;margin:8px 0;border-radius:3px}
+    .restore-dialog .audio-row{display:grid;grid-template-columns:150px 1fr 95px;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+    .restore-dialog input[type=range]{width:100%;accent-color:#637955}
+    .restore-dialog .audio-preview,.restore-dialog .audio-copy{margin:6px 0 12px;padding:10px 12px;background:#f5f1e3;color:var(--paper-ink);border-radius:3px;font:14px/1.7 var(--f-mono);word-break:break-word}
+    .restore-dialog .audio-copy[hidden]{display:none}
+    .restore-dialog .btn{font:13px var(--f-mono);padding:9px 14px;background:#5f7259;border:0;border-radius:2px;color:#fff}
+    .restore-dialog .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+    .restore-dialog .btn:disabled{opacity:.45}
+    @media(max-width:560px){.restore-dialog .audio-row{grid-template-columns:1fr 70px}.restore-dialog .audio-row span:first-child{grid-column:1/-1}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">ВТСО «ЗАПАД-81» / ТЕСТОВАЯ СЦЕНА</div>
+    <h1>Реставрация аудиозаписи</h1>
+    <p class="lead">Прямой доступ к настоящей мини-игре «Встреча с ветераном» из проекта «Дело № 7». Эта страница не запускает сюжет и не меняет сохранения.</p>
+    <section class="panel">
+      <div class="eyebrow" style="color:#706550">АРХИВНАЯ НАХОДКА · АВГУСТ 1975</div>
+      <div class="tape" aria-hidden="true"><div class="tape-label">ВСТРЕЧА С ВЕТЕРАНОМ / 1975</div><div class="reels"><div class="reel"></div><div class="reel"></div></div></div>
+      <p><strong>Кассета «Встреча с ветераном»</strong></p>
+      <p class="muted">Найдена Артёмом в клубе лагеря «Ракета». Не срежьте номер полевой почты чрезмерной очисткой.</p>
+      <div class="row"><button id="open" type="button">Начать реставрацию аудио</button><button id="again" type="button" class="secondary">Открыть ещё раз</button></div>
+      <div id="status" role="status"></div>
+    </section>
+  </main>
+  <script type="module">
+    import { FIND_TEMPLATES, RESTORATIONS } from '/src/data/finds.ts';
+    import { openAudioRestoration } from '/src/ui/restore/audio.ts';
+    const template=FIND_TEMPLATES.find(f=>f.id==='find-tape');
+    const restoration=RESTORATIONS['find-tape'];
+    const status=document.getElementById('status');
+    const open=()=>{
+      if(document.querySelector('.restore-overlay'))return;
+      if(!template||restoration?.kind!=='audio'){status.textContent='Не найдены игровые данные кассеты.';return}
+      status.textContent='';
+      openAudioRestoration({...template,day:1,status:'new'},restoration,(outcome)=>{
+        status.textContent=outcome.digitsLost?'Важные цифры потеряны. Можно повторить сцену.':'Запись сохранена, номер полевой почты читается.';
+      });
+    };
+    document.getElementById('open').addEventListener('click',open);
+    document.getElementById('again').addEventListener('click',open);
+  </script>
+</body>
+</html>

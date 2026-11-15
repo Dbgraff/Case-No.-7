@@ -9,7 +9,7 @@ import {
   archiveWordChips,
   getArchiveDoc,
   searchArchive,
-} from "../../game/archive/archiveSearch";
+} from "../../game/archive/search";
 
 let lastQuery = "";
 

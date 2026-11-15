@@ -1,4 +1,4 @@
-import { subscribe, type GameState } from "../../game/state";
+import { subscribe, type GameState } from "../../core/state";
 import { completeTutorialStep, skipTutorial } from "../../game/tutorial";
 import {
   isActiveStep,

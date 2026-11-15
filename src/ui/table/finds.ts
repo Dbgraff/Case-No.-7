@@ -5,8 +5,8 @@ import {
 } from "../../game/finds";
 import { RESTORATIONS } from "../../data/finds";
 import { PLACES } from "../../data/places";
-import { subscribe, updateFindStatus, type GameState } from "../../game/state";
-import { openRestoration } from "../restore";
+import { subscribe, updateFindStatus, type GameState } from "../../core/state";
+import { openRestoration } from "../restore/index";
 import { finishRestoration } from "./restoreReport";
 import { completeTutorialStep } from "../../game/tutorial";
 

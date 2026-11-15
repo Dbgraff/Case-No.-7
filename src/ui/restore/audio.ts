@@ -4,7 +4,7 @@ import type {
   RestorationOutcome,
   TranscriptPart,
   ValueRange,
-} from "../game/finds";
+} from "../../game/finds";
 
 /** Slider positions at the start (and after "start over"). */
 const START = { noise: 10, hum: 0, speed: 4.19 };

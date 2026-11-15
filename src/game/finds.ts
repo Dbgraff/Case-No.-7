@@ -148,5 +148,33 @@ export type RestorationOutcome = {
   digitsLost: boolean;
 };
 
+/** One smeared word of an ink restoration. */
+export type InkBlank = {
+  /** Surviving letters; "_" marks a lost letter, e.g. "Ф_д_т_в". */
+  pattern: string;
+  /** Words offered to the player. */
+  options: string[];
+  /** The correct word. */
+  answer: string;
+  /** Clue the player must already have to be sure of the word. */
+  needsClue?: string;
+  /** Shown when a fitting word is picked but the clue is missing. */
+  needsHint?: string;
+};
+
+/**
+ * Ink restoration: a document with smeared words. The player picks words by
+ * the surviving letters and by context from other materials.
+ */
+export type InkRestoration = {
+  kind: "ink";
+  /** Text pieces: a string is plain text, a number is an index into `blanks`. */
+  parts: (string | number)[];
+  /** Smeared words. */
+  blanks: InkBlank[];
+  /** What the player learns after all words are restored. */
+  result: RestorationText;
+};
+
 /** All restoration kinds. */
-export type Restoration = MoldRestoration | AudioRestoration | CipherRestoration;
+export type Restoration = MoldRestoration | AudioRestoration | CipherRestoration | InkRestoration;

@@ -1259,3 +1259,80 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.ink-paper { 
+  padding: 16px 18px; 
+  background: var(--paper); 
+  color: var(--paper-ink); 
+  font-family: var(--f-hand); 
+  font-size: 20px; 
+  line-height: 1.7; 
+  border-radius: 2px; 
+}
+
+.ink-blank { 
+  display: inline-block; 
+  padding: 0 6px; 
+  font-family: var(--f-mono); 
+  font-size: 16px; 
+  background: rgba(80, 100, 160, 0.18); 
+  border-bottom: 2px solid #6b5a33; 
+  filter: blur(0.3px); 
+}
+
+.ink-blank.ok { 
+  background: transparent; 
+  border-bottom-color: transparent; 
+  font-family: var(--f-hand); 
+  font-size: 20px; 
+  filter: none; 
+}
+
+.ink-opts { 
+  display: grid; 
+  gap: 8px; 
+  margin-top: 10px; 
+}
+
+.ink-row { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 6px; 
+  align-items: center; 
+}
+
+.ink-row b { 
+  font-family: var(--f-mono); 
+  font-size: 13px; 
+  font-weight: 400; 
+  margin-right: 4px; 
+}
+
+.ink-row button { 
+  padding: 5px 10px; 
+  border: 1px solid var(--rule); 
+  background: var(--sheet); 
+  color: var(--ink); 
+  cursor: pointer; 
+  border-radius: 2px; 
+}
+
+.ink-row button.miss { 
+  border-color: var(--thread); 
+  color: var(--thread); 
+}
+
+.ink-row button.chosen { 
+  border-color: var(--ok); 
+  background: color-mix(in srgb, var(--ok) 18%, var(--sheet)); 
+  font-weight: 600; 
+}
+
+.ink-row button:disabled { 
+  cursor: default; 
+  opacity: 0.6; 
+}
+
+.ink-row button.chosen:disabled { 
+  opacity: 1; 
+}

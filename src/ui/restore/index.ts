@@ -1,6 +1,7 @@
 import type { Find, Restoration, RestorationOutcome } from "./../../game/finds";
-import { openAudioRestoration } from "./фudio";
+import { openAudioRestoration } from "./audio";
 import { openCipherRestoration } from "./сipher";
+import { openInkRestoration } from "./ink";
 
 /** Logical size of the paper, px (the canvas is scaled by CSS). */
 const W = 560;
@@ -232,6 +233,11 @@ export function openRestoration(
 
   if (restoration.kind === "cipher") {
     openCipherRestoration(find, restoration, onDone);
+    return;
+  }
+
+  if (restoration.kind === "ink") {
+    openInkRestoration(find, restoration, onDone);
     return;
   }
 

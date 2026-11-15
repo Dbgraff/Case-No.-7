@@ -982,6 +982,10 @@ export function initIntegratedDesktop(): void {
             );
           });
 
+        document.dispatchEvent(
+          new CustomEvent("case7:browser-page", { detail: page }),
+        );
+
         if (page === "map") {
           window.dispatchEvent(
             new Event("resize"),

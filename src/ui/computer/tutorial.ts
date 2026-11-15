@@ -37,9 +37,29 @@ export function bindTutorial(): void {
 
   onSpaceChange((space) => {
     if (space === "table") completeTutorialStep("toTable");
-    else checkArchive();
+    else { checkArchive(); checkIntegratedArchive(); }
   });
   onTabChange(checkArchive);
+
+  // Integrated desktop uses "Каталог" instead of legacy tab navigation.
+  const checkIntegratedArchive = (): void => {
+    const archiveHost = document.querySelector<HTMLElement>(".id-archive-host");
+    const browserWindow = document.querySelector<HTMLElement>(".window-browser");
+    if (
+      getActiveSpace() === "computer" &&
+      archiveHost && !archiveHost.hidden &&
+      browserWindow && !browserWindow.hidden
+    ) {
+      completeTutorialStep("archive");
+    }
+  };
+
+  document.addEventListener("case7:browser-page", (event: Event) => {
+    if ((event as CustomEvent<string>).detail === "archive") {
+      completeTutorialStep("archive");
+    }
+  });
+  onSpaceChange(checkIntegratedArchive);
   skipBtn.addEventListener("click", skipTutorial);
 
   /** @param {Readonly<GameState>} s - Current game state. */

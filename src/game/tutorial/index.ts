@@ -1,12 +1,12 @@
-import { FIND_TEMPLATES } from "../data/finds";
-import type { Find } from "./finds";
-import { getState, updateState } from "./state";
+import { FIND_TEMPLATES } from "../../data/finds";
+import type { Find } from "../finds";
+import { getState, updateState } from "../../core/state";
 import {
   TUTORIAL_FIND_ID,
   isTutorialRunning,
   nextStep,
   type ActiveTutorialStep,
-} from "./tutorialSteps";
+} from "./steps";
 
 /**
  * Starts the tutorial of a new game: puts the wrapper on the table

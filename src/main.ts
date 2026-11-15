@@ -11,12 +11,12 @@ import {
   getState,
   subscribe,
   updateState,
-} from "./game/state";
-import { PLACES, type Place } from "./map/places";
+} from "./core/state";
+import { PLACES, type Place } from "./data/places";
 import { initCampMap, type CampMap } from "./map/campMap";
 import { bindArchive } from "./ui/computer/archive";
 import { startTutorial } from "./game/tutorial";
-import { isTutorialRunning } from "./game/tutorialSteps";
+import { isTutorialRunning } from "./game/tutorial/steps";
 import { TUTORIAL_INTRO } from "./data/tutorial";
 import { bindTutorial } from "./ui/computer/tutorial";
 import { bindCaseBoard } from "./ui/computer/caseBoard";

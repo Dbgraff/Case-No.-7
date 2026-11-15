@@ -1,11 +1,11 @@
-import type { CipherRestoration, Find, RestorationOutcome } from "../game/finds";
+import type { CipherRestoration, Find, RestorationOutcome } from "../../game/finds";
 import {
   caesarShift,
   decodePolybius,
   matchesPlaintext,
   polybiusTable,
   RU_ALPHABET,
-} from "../game/ciphers";
+} from "../../game/ciphers";
 
 /**
  * Opens the cipher restoration window for a find.

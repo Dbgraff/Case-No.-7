@@ -1,6 +1,6 @@
-import type { Find, Restoration, RestorationOutcome } from "./../game/finds";
-import { openAudioRestoration } from "./restoreAudio";
-import { openCipherRestoration } from "./restoreCipher";
+import type { Find, Restoration, RestorationOutcome } from "./../../game/finds";
+import { openAudioRestoration } from "./фudio";
+import { openCipherRestoration } from "./сipher";
 
 /** Logical size of the paper, px (the canvas is scaled by CSS). */
 const W = 560;

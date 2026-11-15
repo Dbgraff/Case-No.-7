@@ -1,8 +1,8 @@
 import type { Clue, Task } from "./clues";
 import { CLUE_TEMPLATES } from "../data/clues";
 import type { Find, RestorationOutcome } from "./finds";
-import { getState, updateState } from "./state";
-import { openBoardCardsForClue } from "../game/openBoardCards";
+import { getState, updateState } from "../core/state";
+import { openBoardCardsForClue } from "./board/openBoardCards";
 
 /** What happened when a find was restored. */
 export type RestorationResult = {

@@ -4,7 +4,7 @@ import {
   subscribe,
   updateState,
   type GameState,
-} from "../../game/state";
+} from "../../core/state";
 import { notify } from "./notifications";
 
 /** Выбранная карточка: клик по карточке → клик по слоту. */

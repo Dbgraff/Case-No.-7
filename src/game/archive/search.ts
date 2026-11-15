@@ -1,6 +1,6 @@
-import { ARCHIVE_DOCS } from "../data/archive";
-import type { ArchiveDoc, ArchiveHit } from "./archive";
-import type { GameState } from "./state";
+import { ARCHIVE_DOCS } from "../../data/archive";
+import type { ArchiveDoc, ArchiveHit } from ".";
+import type { GameState } from "../../core/state";
 
 /** Lowercase, ё→е, keep letters/digits/spaces, split into tokens length ≥ 3. */
 export function normalizeQuery(q: string): string[] {

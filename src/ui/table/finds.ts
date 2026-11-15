@@ -4,7 +4,7 @@ import {
   type Find,
 } from "../../game/finds";
 import { RESTORATIONS } from "../../data/finds";
-import { PLACES } from "../../map/places";
+import { PLACES } from "../../data/places";
 import { subscribe, updateFindStatus, type GameState } from "../../game/state";
 import { openRestoration } from "../restore";
 import { finishRestoration } from "./restoreReport";

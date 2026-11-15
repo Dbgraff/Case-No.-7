@@ -1,5 +1,5 @@
 import { Application, Container, Graphics, Text, TextStyle } from "pixi.js";
-import type { Place } from "./places";
+import type { Place } from "../data/places";
 
 /** Callbacks the map uses to talk to the rest of the game. */
 export type CampMapHandlers = {

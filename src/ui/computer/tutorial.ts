@@ -4,7 +4,7 @@ import {
   isActiveStep,
   isTutorialRunning,
   type TutorialStep,
-} from "../../game/tutorialSteps";
+} from "../../game/tutorial/steps";
 import {
   TUTORIAL_DONE_TEXT,
   TUTORIAL_HINTS,

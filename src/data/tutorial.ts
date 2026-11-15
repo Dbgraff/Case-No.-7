@@ -1,4 +1,4 @@
-import type { ActiveTutorialStep } from "../game/tutorialSteps";
+import type { ActiveTutorialStep } from "../game/tutorial/steps";
 
 /**
  * ЗАГЛУШКИ. Настоящие тексты обучения пишет сюжетный разработчик.

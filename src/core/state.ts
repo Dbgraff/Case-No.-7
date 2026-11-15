@@ -1,7 +1,7 @@
-import type { Find, FindStatus } from "./finds";
-import type { Clue, Task } from "./clues";
-import { isTutorialStep, type TutorialStep } from "./tutorialSteps";
-import type { BoardCard, BoardSlotId } from "./board";
+import type { Find, FindStatus } from "../game/finds";
+import type { Clue, Task } from "../game/clues";
+import { isTutorialStep, type TutorialStep } from "../game/tutorial/steps";
+import type { BoardCard, BoardSlotId } from "../game/board";
 
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {

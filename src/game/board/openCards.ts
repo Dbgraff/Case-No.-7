@@ -1,6 +1,6 @@
-import { BOARD_CARD_TEMPLATES } from "../data/board";
-import type { BoardCard } from "./board";
-import { addBoardCards } from "./state";
+import { BOARD_CARD_TEMPLATES } from "../../data/board";
+import type { BoardCard } from ".";
+import { addBoardCards } from "../../core/state";
 
 /** Opens board cards linked to the given clue id. */
 export function openBoardCardsForClue(clueId: string): void {

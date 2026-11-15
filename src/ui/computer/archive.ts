@@ -4,12 +4,12 @@ import {
   markDocRead,
   getState,
   type GameState,
-} from "../../game/state";
+} from "../../core/state";
 import {
   archiveWordChips,
   getArchiveDoc,
   searchArchive,
-} from "../../game/archiveSearch";
+} from "../../game/archive/archiveSearch";
 
 let lastQuery = "";
 

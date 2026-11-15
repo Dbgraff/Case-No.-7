@@ -1,219 +1,207 @@
 import "./style.css";
-import { Application, Container, Graphics, Text, TextStyle } from "pixi.js";
+import { initNotifications, notify } from "./ui/computer/notifications";
+import { addTableNews, initSpaces } from "./ui/spaces";
+import { initTabs } from "./ui/computer/tabs";
+import { bindFinds } from "./ui/table/finds";
+import { bindTopbar } from "./ui/computer/topbar";
+import { endDay, type DayReport } from "./game/endDay";
+import {
+  GROUP_TRIP_COST_HOURS,
+  HOURS_PER_DAY,
+  getState,
+  subscribe,
+  updateState,
+} from "./core/state";
+import { PLACES, type Place } from "./data/places";
+import { initCampMap, type CampMap } from "./map/campMap";
+import { bindArchive } from "./ui/computer/archive";
+import { startTutorial } from "./game/tutorial";
+import { isTutorialRunning } from "./game/tutorial/steps";
+import { TUTORIAL_INTRO } from "./data/tutorial";
+import { bindTutorial } from "./ui/computer/tutorial";
+import { bindCaseBoard } from "./ui/computer/caseBoard";
 
-/* ===== simple radio chat ===== */
-const chatEl = document.getElementById("chat")!;
-function say(who: string, text: string, cls = "") {
-  const bub = document.createElement("div");
-  bub.className = "bub" + (cls ? " " + cls : "");
-  const b = document.createElement("b");
-  b.textContent = who;
-  bub.appendChild(b);
-  bub.appendChild(document.createTextNode(text));
-  chatEl.appendChild(bub);
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-/* ===== tabs ===== */
-const tabs = document.getElementById("tabs")!;
-tabs.addEventListener("click", (e) => {
-  const btn = (e.target as HTMLElement).closest("button[data-tab]") as HTMLButtonElement | null;
-  if (!btn) return;
-  const tab = btn.dataset.tab!;
-  tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
-  document.querySelectorAll<HTMLElement>(".pane").forEach((p) => {
-    const on = p.dataset.pane === tab;
-    p.classList.toggle("on", on);
-    p.hidden = !on;
-  });
-});
-
-/* ===== places on the map ===== */
-type Place = {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-const PLACES: Place[] = [
-  { id: "gate", name: "Ворота", x: 40, y: 160, w: 80, h: 44 },
-  { id: "k1", name: "Корпус 1", x: 160, y: 70, w: 100, h: 52 },
-  { id: "k2", name: "Корпус 2", x: 300, y: 80, w: 90, h: 48 },
-  { id: "club", name: "Клуб", x: 170, y: 180, w: 90, h: 48 },
-  { id: "stage", name: "Эстрада", x: 310, y: 220, w: 100, h: 44 },
-];
-
+/** Place currently chosen on the map (not yet visited). */
 let selected: Place | null = null;
+let campMap: CampMap | null = null;
+
 const btnSend = document.getElementById("btnSend") as HTMLButtonElement;
+const btnEndDay = document.getElementById("btnEndDay") as HTMLButtonElement;
 const placeLabel = document.getElementById("placeLabel")!;
 
-function selectPlace(p: Place | null) {
+/**
+ * Returns the display name of a place by its id.
+ * @param {string} id - Place id.
+ * @returns {string} Place name (or the id if the place is unknown).
+ */
+function placeName(id: string): string {
+  return PLACES.find((p) => p.id === id)?.name ?? id;
+}
+
+/**
+ * Enables "send group" only when a place is chosen and there is enough time.
+ * @returns {void}
+ */
+function refreshSendButton(): void {
+  btnSend.disabled = !selected || getState().hoursLeft < GROUP_TRIP_COST_HOURS;
+}
+
+/**
+ * Updates the selected place and the "send group" controls.
+ * @param {Place | null} p - New selection, or `null` to clear it.
+ * @returns {void}
+ */
+function selectPlace(p: Place | null): void {
   selected = p;
-  btnSend.disabled = !p;
+  refreshSendButton();
   placeLabel.textContent = p ? p.name : "место не выбрано";
+  campMap?.setSelected(p ? p.id : null);
+}
+
+/** Delay before the group reports its arrival at a place, ms. */
+const ARRIVAL_DELAY_MS = 4000;
+
+/** A group arrival report that has been scheduled but not yet delivered. */
+type PendingArrival = { timer: number; deliver: () => void };
+
+const pendingArrivals = new Set<PendingArrival>();
+
+/**
+ * Schedules the group's arrival message. After the last pending arrival of a
+ * day with no hours left, a "sunset" system notification follows.
+ * @param {string} name - Name of the place the group is heading to.
+ * @returns {void}
+ */
+function scheduleArrival(name: string): void {
+  const arrival: PendingArrival = { timer: 0, deliver: () => {} };
+  arrival.deliver = () => {
+    pendingArrivals.delete(arrival);
+    notify("Даша", `Прибыли к «${name}». Приём.`);
+    if (pendingArrivals.size === 0 && getState().hoursLeft === 0) {
+      notify(
+        "Система",
+        "Солнце село. Выходов на сегодня больше нет — завершите день.",
+        "sys",
+      );
+    }
+  };
+  arrival.timer = window.setTimeout(arrival.deliver, ARRIVAL_DELAY_MS);
+  pendingArrivals.add(arrival);
+}
+
+/**
+ * Delivers all scheduled arrival messages immediately (used before the day
+ * ends, so reports keep their order).
+ * @returns {void}
+ */
+function flushArrivals(): void {
+  for (const a of [...pendingArrivals]) {
+    window.clearTimeout(a.timer);
+    a.deliver();
+  }
 }
 
 btnSend.addEventListener("click", () => {
-  if (!selected) return;
-  say("Даша", `Идём к «${selected.name}». Приём.`, "find");
-  say("Артём", "Приняли. Выдвигаемся.");
+  if (!selected || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
+  const s = getState();
+  const target = selected;
+  updateState({
+    hoursLeft: s.hoursLeft - GROUP_TRIP_COST_HOURS,
+    visits: [...s.visits, target.id],
+    groupPlaceId: target.id,
+  });
+  campMap?.setGroupPlace(target.id);
+  notify("Даша", `Идём к «${target.name}». Приём.`);
+  notify("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
+  scheduleArrival(target.name);
 });
 
-/* ===== Pixi map ===== */
-async function initPixi() {
-  const host = document.getElementById("pixi-host")!;
-  const app = new Application();
-  await app.init({
-    background: "#2a2e28",
-    resizeTo: host,
-    antialias: true,
-    resolution: Math.min(window.devicePixelRatio || 1, 2),
-    autoDensity: true,
-  });
-  host.appendChild(app.canvas);
+/**
+ * Reports the results of the group's trips in the chat: a find with its
+ * origin, or a message that nothing new was found.
+ * @param {DayReport} report - Report returned by `endDay()`.
+ * @returns {void}
+ */
+function reportDay(report: DayReport): void {
+  notify("Система", `День ${report.endedDay} завершён.`, "sys");
 
-  const world = new Container();
-  app.stage.addChild(world);
-
-  const ground = new Graphics();
-  ground.rect(0, 0, 480, 340);
-  ground.fill(0x3d4538);
-  world.addChild(ground);
-
-  const grid = new Graphics();
-  for (let x = 0; x <= 480; x += 40) {
-    grid.moveTo(x, 0);
-    grid.lineTo(x, 340);
-  }
-  for (let y = 0; y <= 340; y += 40) {
-    grid.moveTo(0, y);
-    grid.lineTo(480, y);
-  }
-  grid.stroke({ width: 1, color: 0x4a5344, alpha: 0.45 });
-  world.addChild(grid);
-
-  const title = new Text({
-    text: "ЛАГЕРЬ «РАКЕТА» · 2026",
-    style: new TextStyle({
-      fontFamily: "PT Mono, monospace",
-      fontSize: 12,
-      fill: 0x9aa294,
-      letterSpacing: 1.5,
-    }),
-  });
-  title.x = 14;
-  title.y = 10;
-  world.addChild(title);
-
-  const placeGfx = new Map<string, { bg: Graphics; label: Text }>();
-
-  for (const p of PLACES) {
-    const g = new Container();
-    g.eventMode = "static";
-    g.cursor = "pointer";
-
-    const bg = new Graphics();
-    bg.roundRect(0, 0, p.w, p.h, 4);
-    bg.fill(0xb8bca8);
-    bg.stroke({ width: 1.5, color: 0x6d5b2c });
-    g.addChild(bg);
-
-    const label = new Text({
-      text: p.name,
-      style: new TextStyle({
-        fontFamily: "PT Mono, monospace",
-        fontSize: 12,
-        fill: 0x2b2416,
-      }),
-    });
-    label.anchor.set(0.5);
-    label.x = p.w / 2;
-    label.y = p.h / 2;
-    g.addChild(label);
-
-    g.x = p.x;
-    g.y = p.y;
-
-    g.on("pointerover", () => {
-      bg.clear();
-      bg.roundRect(0, 0, p.w, p.h, 4);
-      bg.fill(0xd0d4c4);
-      bg.stroke({ width: 2, color: 0xd45348 });
-    });
-    g.on("pointerout", () => {
-      const isSel = selected?.id === p.id;
-      bg.clear();
-      bg.roundRect(0, 0, p.w, p.h, 4);
-      bg.fill(isSel ? 0xc8c1a6 : 0xb8bca8);
-      bg.stroke({ width: isSel ? 2.5 : 1.5, color: isSel ? 0xd45348 : 0x6d5b2c });
-    });
-    g.on("pointertap", () => {
-      selectPlace(p);
-      for (const pl of PLACES) {
-        const node = placeGfx.get(pl.id);
-        if (!node) continue;
-        const on = pl.id === p.id;
-        node.bg.clear();
-        node.bg.roundRect(0, 0, pl.w, pl.h, 4);
-        node.bg.fill(on ? 0xc8c1a6 : 0xb8bca8);
-        node.bg.stroke({ width: on ? 2.5 : 1.5, color: on ? 0xd45348 : 0x6d5b2c });
-      }
-      say("Штаб", `Отметили на карте: ${p.name}.`);
-    });
-
-    world.addChild(g);
-    placeGfx.set(p.id, { bg, label });
+  if (report.trips.length === 0) {
+    notify("Даша", "Сегодня выходов не было. Ждём новых указаний. Приём.");
   }
 
-  let dragging = false;
-  let lastX = 0;
-  let lastY = 0;
-  world.x = 20;
-  world.y = 20;
+  let foundCount = 0;
+  for (const trip of report.trips) {
+    const place = placeName(trip.placeId);
+    if (trip.find) {
+      foundCount++;
+      notify(
+        trip.find.foundBy,
+        `«${place}»: нашли «${trip.find.title}». ${trip.find.circumstances} Приём.`,
+        "story",
+      );
+    } else {
+      notify("Даша", `«${place}»: ничего нового. Приём.`);
+    }
+  }
 
-  app.canvas.addEventListener("pointerdown", (e) => {
-    dragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  });
-  window.addEventListener("pointerup", () => {
-    dragging = false;
-  });
-  window.addEventListener("pointermove", (e) => {
-    if (!dragging) return;
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
-    lastX = e.clientX;
-    lastY = e.clientY;
-    world.x += dx;
-    world.y += dy;
-  });
-
-  const hint = new Text({
-    text: "Тяните карту · клик по зданию — выбор",
-    style: new TextStyle({
-      fontFamily: "PT Mono, monospace",
-      fontSize: 11,
-      fill: 0x7a8274,
-    }),
-  });
-  hint.x = 14;
-  hint.y = 318;
-  world.addChild(hint);
+  if (foundCount > 0) {
+    addTableNews(foundCount);
+    notify("Система", "Новые находки — на реставрационном столе.", "sys");
+  }
+  notify("Система", `Начался день ${report.newDay}. До заката ${HOURS_PER_DAY} ч.`, "sys");
 }
 
-/* ===== boot ===== */
-say("Даша", "Штаб, мы у ворот «Ракеты». До заката пять часов. Корпуса 1, 2 и 4 — третьего нет. Где жила «Искра»?");
-say(
-  "Командир",
-  "Поиск по архиву бесплатный. Выходы группы стоят времени. Сначала разберитесь в документах, потом отправляйте ребят.",
-);
-
-initPixi().catch((err) => {
-  console.error(err);
-  say("Система", "Не удалось запустить карту (Pixi). Проверьте консоль.", "sys");
+btnEndDay.addEventListener("click", () => {
+  flushArrivals();
+  const report = endDay();
+  selectPlace(null);
+  reportDay(report);
 });
+
+/* ===== boot ===== */
+initTabs();
+initSpaces();
+initNotifications();
+bindTopbar();
+bindFinds();
+subscribe(refreshSendButton);
+bindArchive();
+bindCaseBoard();
+
+if (startTutorial()) addTableNews(1);
+
+if (isTutorialRunning(getState().tutorialStep)) {
+  notify(TUTORIAL_INTRO.who, TUTORIAL_INTRO.text);
+} else {
+  notify(
+    "Даша",
+    "Штаб, мы у ворот «Ракеты». До заката пять часов. Корпуса 1, 2 и 4 — третьего нет. Где жила «Искра»?",
+  );
+  notify(
+    "Командир",
+    "Поиск по архиву бесплатный. Выходы группы стоят времени. Сначала разберитесь в документах, потом отправляйте ребят.",
+  );
+}
+bindTutorial();
+
+initCampMap(document.getElementById("pixi-host")!, PLACES, {
+  onSelect: (p) => {
+    if (p.id === getState().groupPlaceId) {
+      selectPlace(null);
+      notify("Штаб", `Группа уже находится у «${p.name}». Выберите другое место.`);
+      return;
+    }
+    selectPlace(p);
+    notify("Штаб", `Отметили на карте: ${p.name}.`);
+  },
+})
+  .then((map) => {
+    campMap = map;
+    map.setGroupPlace(getState().groupPlaceId);
+  })
+  .catch((err) => {
+    console.error(err);
+    notify("Система", "Не удалось запустить карту (Pixi). Проверьте консоль.", "sys");
+  });
+  

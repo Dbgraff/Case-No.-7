@@ -425,12 +425,12 @@ function caseContent(): string {
         <div class="paper-top">
           <span>ЛИЧНОЕ ДЕЛО</span><span>№ 007</span>
         </div>
-        <h2>Федотов<br>Иван Андреевич</h2>
+        <h2>Федотов<br>Иван Степанович</h2>
         <div class="paper-divider"></div>
 
         <dl>
           <div><dt>Год исчезновения</dt><dd>1942</dd></div>
-          <div><dt>Регион</dt><dd>Смоленская область</dd></div>
+          <div><dt>Место рождения</dt><dd>Калининская область</dd></div>
           <div><dt>Статус</dt><dd>Пропал без вести</dd></div>
           <div><dt>Расследование</dt><dd>1975</dd></div>
         </dl>

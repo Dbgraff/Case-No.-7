@@ -430,7 +430,7 @@ function caseContent(): string {
 
         <dl>
           <div><dt>Год исчезновения</dt><dd>1942</dd></div>
-          <div><dt>Регион</dt><dd>Смоленская область</dd></div>
+          <div><dt>Место рождения</dt><dd>Калининская область</dd></div>
           <div><dt>Статус</dt><dd>Пропал без вести</dd></div>
           <div><dt>Расследование</dt><dd>1975</dd></div>
         </dl>

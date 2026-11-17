@@ -20,9 +20,9 @@ export function initPrologue(): void {
   host.innerHTML = `
     <button type="button" class="prologue-drawer-toggle" id="prologueDrawerToggle" aria-label="Открыть сообщения">✉ <span id="prologueDrawerUnread"></span></button>
     <aside class="prologue-chat" aria-label="Связь со штабом">
-      <header><span>СВЯЗЬ СО ШТАБОМ</span><b>●</b></header>
+      <header class="prologue-contact"><span class="prologue-contact-avatar" aria-hidden="true">✉</span><span class="prologue-contact-info"><strong>Поисковая группа</strong><small><span class="prologue-online-dot"></span>На связи</small></span></header>
       <div class="prologue-messages" id="prologueMessages" aria-live="polite"></div>
-      <footer>Входящие сообщения · общий канал группы</footer>
+      <footer>Сообщения поисковой группы</footer>
     </aside>
     <div class="prologue-stage" id="prologueStage"></div>
   `;
@@ -39,10 +39,12 @@ export function initPrologue(): void {
 
   const append = ({ who, text, kind }: ChatMessage): void => {
     const box = document.createElement("div");
-    box.className = "prologue-message " + (kind === "sys" ? "system" : "");
+    box.className = "prologue-message" + (kind === "sys" ? " system" : kind === "story" ? " story" : "");
     const author = document.createElement("strong");
+    author.className = "prologue-message-author";
     author.textContent = who;
     const body = document.createElement("p");
+    body.className = "prologue-message-text";
     body.textContent = text;
     box.append(author, body);
     messages.appendChild(box);

@@ -136,6 +136,8 @@ function showToast(who: string, text: string, kind: ChatKind): void {
 /** All messages are delivered to chat; hidden messages receive badges + toast. */
 export function notify(who: string, text: string, kind: ChatKind = ""): void {
   say(who, text, kind);
+  const prologue = document.querySelector<HTMLElement>(".case7-prologue");
+  if (getActiveSpace() === "table" && prologue && !prologue.hidden) return;
   if (isChatVisible()) {
     clearWhenVisible();
     return;

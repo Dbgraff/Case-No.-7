@@ -137,7 +137,7 @@ function showToast(who: string, text: string, kind: ChatKind): void {
 export function notify(who: string, text: string, kind: ChatKind = ""): void {
   say(who, text, kind);
   const prologue = document.querySelector<HTMLElement>(".case7-prologue");
-  if (getActiveSpace() === "table" && prologue && !prologue.hidden) return;
+  if (getActiveSpace() === "table" && prologue && !prologue.hidden && !prologue.classList.contains("prologue-drawer-only")) return;
   if (isChatVisible()) {
     clearWhenVisible();
     return;

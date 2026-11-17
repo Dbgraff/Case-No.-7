@@ -26,9 +26,6 @@ const btnSend = document.getElementById("btnSend") as HTMLButtonElement;
 const btnEndDay = document.getElementById("btnEndDay") as HTMLButtonElement;
 const placeLabel = document.getElementById("placeLabel")!;
 
-function placeName(id: string): string {
-  return PLACES.find(p => p.id === id)?.name ?? id;
-}
 function refreshSendButton(): void {
   btnSend.disabled = !selected || (isTutorialRunning(getState().tutorialStep) && !(getState().tutorialStep === "dispatch" && selected.id === "gate")) || getState().hoursLeft < GROUP_TRIP_COST_HOURS;
   btnEndDay.disabled = isTutorialRunning(getState().tutorialStep);

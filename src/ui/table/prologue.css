@@ -40,3 +40,23 @@
 .prologue-confirm { width: auto !important; align-self: flex-start; border: 1px solid #ddc39a; background: #c7a772; padding: 12px 22px; font: bold 14px Arial,sans-serif; cursor: pointer; color: #282118; }
 #prologueFeedback { min-height: 17px; font: 13px Arial,sans-serif; color: #e7c59d; }
 @media(max-width:800px) { .id-table-workspace .case7-prologue { grid-template-columns: 1fr; position: relative; inset: auto; }.prologue-chat { max-height: 240px; }.prologue-messages { max-height: 160px; }.prologue-docs { grid-template-columns:1fr; } }
+
+.case7-prologue .prologue-drawer-toggle { display:none; }
+.id-table-workspace .case7-prologue.prologue-drawer-only {
+  inset:54px auto auto 0; position:absolute; display:block; width:0; height:0;
+  min-height:0; background:transparent; overflow:visible; pointer-events:none;
+}
+.case7-prologue.prologue-drawer-only .prologue-stage { display:none !important; }
+.case7-prologue.prologue-drawer-only .prologue-drawer-toggle {
+  display:block; position:absolute; left:0; top:16px; width:49px; height:55px;
+  border:1px solid #aa9c83; border-radius:0 8px 8px 0; color:#f1ddbc;
+  background:#1e3028; font:22px Arial,sans-serif; cursor:pointer; pointer-events:auto;
+}
+.prologue-drawer-toggle span { font:12px Arial,sans-serif; color:#eed1a4; }
+.case7-prologue.prologue-drawer-only .prologue-chat {
+  position:absolute; left:0; top:0; width:min(340px,90vw); height:calc(100dvh - 54px);
+  transform:translateX(-105%); transition: transform .2s; pointer-events:auto;
+  box-shadow:10px 0 20px #0009;
+}
+.case7-prologue.prologue-drawer-only.drawer-open .prologue-chat { transform:translateX(0); }
+.case7-prologue.prologue-drawer-only.drawer-open .prologue-drawer-toggle { left:min(340px,90vw); }

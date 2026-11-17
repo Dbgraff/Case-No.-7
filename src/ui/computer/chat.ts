@@ -26,4 +26,5 @@ export function say(who: string, text: string, kind: ChatKind = ""): void {
   bub.appendChild(document.createTextNode(text));
   chatEl.appendChild(bub);
   chatEl.scrollTop = chatEl.scrollHeight;
+  document.dispatchEvent(new CustomEvent("case7:chat-message", { detail: { who, text, kind } }));
 }

@@ -17,6 +17,7 @@ export function initPrologue(): void {
   host.className = "case7-prologue";
   host.setAttribute("aria-label", "Изучение дела № 7");
   host.innerHTML = `
+    <button type="button" class="prologue-drawer-toggle" id="prologueDrawerToggle" aria-label="Открыть сообщения">✉ <span id="prologueDrawerUnread"></span></button>
     <aside class="prologue-chat" aria-label="Связь со штабом">
       <header><span>СВЯЗЬ СО ШТАБОМ</span><b>●</b></header>
       <div class="prologue-messages" id="prologueMessages" aria-live="polite"></div>
@@ -27,6 +28,13 @@ export function initPrologue(): void {
   workspace.appendChild(host);
   const stage = host.querySelector<HTMLElement>("#prologueStage")!;
   const messages = host.querySelector<HTMLElement>("#prologueMessages")!;
+  const toggle = host.querySelector<HTMLButtonElement>("#prologueDrawerToggle")!;
+  const unread = host.querySelector<HTMLElement>("#prologueDrawerUnread")!;
+  let unreadCount = 0;
+  toggle.addEventListener("click", () => {
+    host.classList.toggle("drawer-open");
+    if (host.classList.contains("drawer-open")) { unreadCount = 0; unread.textContent = ""; }
+  });
 
   const append = ({ who, text, kind }: ChatMessage): void => {
     const box = document.createElement("div");
@@ -38,6 +46,10 @@ export function initPrologue(): void {
     box.append(author, body);
     messages.appendChild(box);
     messages.scrollTop = messages.scrollHeight;
+    if (host.classList.contains("prologue-drawer-only") && !host.classList.contains("drawer-open")) {
+      unreadCount++;
+      unread.textContent = String(unreadCount);
+    }
   };
   for (const item of OPENING) append(item);
   document.addEventListener("case7:chat-message", (e: Event) => {
@@ -47,7 +59,10 @@ export function initPrologue(): void {
   const render = (): void => {
     const step = getState().tutorialStep;
     const active = step === "caseFolder" || step === "caseCompare";
-    host.hidden = !active;
+    host.hidden = false;
+    host.classList.toggle("prologue-drawer-only", !active);
+    if (active) { host.classList.remove("drawer-open"); unreadCount = 0; unread.textContent = ""; }
+    stage.hidden = !active;
     if (!active) return;
 
     if (step === "caseFolder") {

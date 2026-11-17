@@ -2,6 +2,7 @@ import "./prologue.css";
 import { getState, subscribe } from "../../core/state";
 import { completeTutorialStep } from "../../game/tutorial";
 import { showSpace } from "../spaces";
+import { say } from "../computer/chat";
 
 type ChatMessage = { who: string; text: string; kind: string };
 const OPENING: ChatMessage[] = [
@@ -51,10 +52,12 @@ export function initPrologue(): void {
       unread.textContent = String(unreadCount);
     }
   };
-  for (const item of OPENING) append(item);
   document.addEventListener("case7:chat-message", (e: Event) => {
     append((e as CustomEvent<ChatMessage>).detail);
   });
+  if (getState().tutorialStep === "caseFolder" || getState().tutorialStep === "caseCompare") {
+    for (const item of OPENING) say(item.who, item.text, "story");
+  }
 
   const render = (): void => {
     const step = getState().tutorialStep;
@@ -105,7 +108,7 @@ export function initPrologue(): void {
       } else if (selected.value !== "uncertain") {
         feedback.textContent = "У нас два несовпадающих источника. Пока нет оснований считать один из годов достоверным.";
       } else {
-        append({ who: "Командир", text: "Верно. Расхождение записали. Нужны дополнительные материалы. Вернём группу в лагерь и проверим документы «Искры».", kind: "story" });
+        say("Командир", "Верно. Расхождение записали. Нужны дополнительные материалы. Вернём группу в лагерь и проверим документы «Искры».", "story");
         completeTutorialStep("caseCompare");
       }
     });

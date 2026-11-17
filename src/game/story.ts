@@ -78,7 +78,8 @@ export function initStory(onGameReady: () => void): void {
     briefingScheduled = true;
     const s = getState();
     if (s.day !== 1 || s.visits.length > 0 || s.finds.some(f => f.id === "find-damaged-sheet")) {
-      queueStoryMessage("Командир", "Первое расхождение зафиксировано. Продолжайте искать материалы «Искры» в лагере и проверять сведения по независимым источникам.", "story", 1400);
+      queueStoryMessage("Командир", "Первое расхождение зафиксировано. Теперь нужно выяснить, где в 1975 году жил отряд «Искра», и найти дополнительные материалы.", "story", 1400);
+      queueStoryMessage("Лёша", "Начните со справки о лагере и плана 1975 года в электронном каталоге. После реконструкции номера корпусов изменились.");
       return;
     }
 

@@ -38,44 +38,52 @@ function selectPlace(place: Place | null): void {
   campMap?.setSelected(place ? place.id : null);
 }
 
-const ARRIVAL_DELAY_MS = 4000;
 type PendingArrival = { timer: number; deliver: () => void };
 const pendingArrivals = new Set<PendingArrival>();
 
-function scheduleArrival(name: string): void {
-  const arrival: PendingArrival = { timer: 0, deliver: () => {} };
-  arrival.deliver = () => {
-    pendingArrivals.delete(arrival);
-    queueStoryMessage("Даша", `Прибыли к «${name}». Приём.`);
-    if (pendingArrivals.size === 0 && getState().hoursLeft === 0) {
-      notify("Система", "Время на вылазку вышло. Завершите день, чтобы продолжить расследование утром.", "sys");
-    }
-  };
-  arrival.timer = window.setTimeout(arrival.deliver, ARRIVAL_DELAY_MS);
-  pendingArrivals.add(arrival);
-}
-function flushArrivals(): void {
-  for (const arrival of [...pendingArrivals]) {
-    window.clearTimeout(arrival.timer);
-    arrival.deliver();
-  }
-}
+
 
 btnSend.addEventListener("click", () => {
-  if (!selected || isTutorialRunning(getState().tutorialStep) || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
+  if (
+    !selected ||
+    isTutorialRunning(getState().tutorialStep) ||
+    getState().hoursLeft < GROUP_TRIP_COST_HOURS
+  ) {
+    return;
+  }
+
   const state = getState();
   const target = selected;
-  // story.ts listens for new visits and delivers finds immediately.
+
+  // Сначала ставим сообщения о движении группы в очередь.
+  queueStoryMessage(
+    "Даша",
+    `Идём к «${target.name}». Приём.`
+  );
+
+  queueStoryMessage(
+    "Артём",
+    "Приняли. Выдвигаемся."
+  );
+
+  queueStoryMessage(
+    "Даша",
+    `Прибыли к «${target.name}». Приём.`,
+    "story",
+    4000
+  );
+
+  // Только затем обновляем состояние.
+  // Подписчик story.ts поставит сообщения о находках
+  // после сообщений о прибытии.
   updateState({
     hoursLeft: state.hoursLeft - GROUP_TRIP_COST_HOURS,
     visits: [...state.visits, target.id],
     groupPlaceId: target.id,
   });
+
   campMap?.setGroupPlace(target.id);
-  queueStoryMessage("Даша", `Идём к «${target.name}». Приём.`);
-  queueStoryMessage("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
-  scheduleArrival(target.name);
 });
 
 function reportDay(report: DayReport): void {
@@ -90,7 +98,6 @@ function reportDay(report: DayReport): void {
 }
 btnEndDay.addEventListener("click", () => {
   if (isTutorialRunning(getState().tutorialStep)) return;
-  flushArrivals();
   const report = endDay();
   selectPlace(null);
   reportDay(report);

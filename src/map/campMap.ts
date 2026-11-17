@@ -1,5 +1,6 @@
 import { Application, Container, Graphics, Text, TextStyle } from "pixi.js";
 import type { Place } from "../data/places";
+import "./campMap.css";
 
 /** Callbacks the map uses to talk to the rest of the game. */
 export type CampMapHandlers = {
@@ -68,15 +69,21 @@ export async function initCampMap(
   places: Place[],
   handlers: CampMapHandlers,
 ): Promise<CampMap> {
+
   const app = new Application();
+
   await app.init({
-    background: "#2a2e28",
-    resizeTo: host,
+    background: "#28332b",
     antialias: true,
     resolution: Math.min(window.devicePixelRatio || 1, 2),
     autoDensity: true,
+    width: Math.max(1, host.clientWidth),
+    height: Math.max(1, host.clientHeight),
   });
+
   host.appendChild(app.canvas);
+  app.canvas.style.touchAction = "none";
+
 
   const world = new Container();
   app.stage.addChild(world);
@@ -173,26 +180,94 @@ export async function initCampMap(
   world.addChild(groupMarker);
 
   // drag-to-pan
+
+  const MAP_W = 480;
+  const MAP_H = 340;
+  const MARGIN = 18;
+
+  let offsetX = 0;
+  let offsetY = 0;
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
-  world.x = 20;
-  world.y = 20;
 
-  app.canvas.addEventListener("pointerdown", (e) => {
+  function resetView(): void {
+    const width = host.clientWidth;
+    const height = host.clientHeight;
+
+    if (width < 2 || height < 2) return;
+
+    app.renderer.resize(width, height);
+
+    const scale = Math.max(
+      0.05,
+      Math.min(
+        (width - MARGIN * 2) / MAP_W,
+        (height - MARGIN * 2) / MAP_H
+      )
+    );
+
+    world.scale.set(scale);
+
+    offsetX = (width - MAP_W * scale) / 2;
+    offsetY = (height - MAP_H * scale) / 2;
+
+    world.position.set(offsetX, offsetY);
+  }
+
+  // Отслеживаем изменение размера окна.
+  const observer = new ResizeObserver(resetView);
+  observer.observe(host);
+
+  requestAnimationFrame(resetView);
+
+  window.addEventListener("resize", resetView);
+
+  // При открытии страницы карты пересчитываем масштаб.
+  document.addEventListener(
+    "case7:browser-page",
+    (event: Event) => {
+      const page = (event as CustomEvent<string>).detail;
+
+      if (page === "map") {
+        requestAnimationFrame(resetView);
+      }
+    }
+  );
+
+  // Ограниченное перетаскивание карты.
+  app.canvas.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+
     dragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
+    lastX = event.clientX;
+    lastY = event.clientY;
   });
+
   window.addEventListener("pointerup", () => {
     dragging = false;
   });
-  window.addEventListener("pointermove", (e) => {
-    if (!dragging) return;
-    world.x += e.clientX - lastX;
-    world.y += e.clientY - lastY;
-    lastX = e.clientX;
-    lastY = e.clientY;
+
+  window.addEventListener("pointermove", (event) => {
+    if (!dragging || host.clientWidth < 2) return;
+
+    const dx = event.clientX - lastX;
+    const dy = event.clientY - lastY;
+
+    lastX = event.clientX;
+    lastY = event.clientY;
+
+    const maxPan = 65;
+
+    world.x = Math.max(
+      offsetX - maxPan,
+      Math.min(offsetX + maxPan, world.x + dx)
+    );
+
+    world.y = Math.max(
+      offsetY - maxPan,
+      Math.min(offsetY + maxPan, world.y + dy)
+    );
   });
 
   const hint = new Text({

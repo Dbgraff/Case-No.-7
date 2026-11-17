@@ -11,7 +11,7 @@ import {
   TUTORIAL_SKIPPED_TEXT,
 } from "../../data/tutorial";
 import { getActiveSpace, onSpaceChange } from "../spaces";
-import { notify } from "./notifications";
+import { queueStoryMessage } from "../../game/story";
 import { getActiveTab, onTabChange } from "./tabs";
 
 /**
@@ -71,11 +71,11 @@ export function bindTutorial(): void {
     shown = step;
 
     if (isActiveStep(step)) {
-      notify("Система", TUTORIAL_HINTS[step], "sys");
+      queueStoryMessage("Система", TUTORIAL_HINTS[step], "sys", 550);
     } else if (step === "done" && prev !== null && isActiveStep(prev)) {
-      notify("Система", TUTORIAL_DONE_TEXT, "sys");
+      queueStoryMessage("Система", TUTORIAL_DONE_TEXT, "sys", 550);
     } else if (step === "skipped" && prev !== null && isTutorialRunning(prev)) {
-      notify("Система", TUTORIAL_SKIPPED_TEXT, "sys");
+      queueStoryMessage("Система", TUTORIAL_SKIPPED_TEXT, "sys", 550);
     }
   };
   subscribe(render);

@@ -10,7 +10,9 @@ import { GROUP_TRIP_COST_HOURS, HOURS_PER_DAY, getState, subscribe, updateState 
 import { PLACES, type Place } from "./data/places";
 import { initCampMap, type CampMap } from "./map/campMap";
 import { bindArchive } from "./ui/computer/archive";
-import { startTutorial } from "./game/tutorial";
+import { completeTutorialStep, startTutorial } from "./game/tutorial";
+import { FIND_TEMPLATES } from "./data/finds";
+import { initPrologue } from "./ui/table/prologue";
 import { isTutorialRunning } from "./game/tutorial/steps";
 import { bindTutorial } from "./ui/computer/tutorial";
 import { bindCaseBoard } from "./ui/computer/caseBoard";
@@ -28,7 +30,7 @@ function placeName(id: string): string {
   return PLACES.find(p => p.id === id)?.name ?? id;
 }
 function refreshSendButton(): void {
-  btnSend.disabled = !selected || isTutorialRunning(getState().tutorialStep) || getState().hoursLeft < GROUP_TRIP_COST_HOURS;
+  btnSend.disabled = !selected || (isTutorialRunning(getState().tutorialStep) && !(getState().tutorialStep === "dispatch" && selected.id === "gate")) || getState().hoursLeft < GROUP_TRIP_COST_HOURS;
   btnEndDay.disabled = isTutorialRunning(getState().tutorialStep);
 }
 function selectPlace(place: Place | null): void {
@@ -42,11 +44,21 @@ const ARRIVAL_DELAY_MS = 4000;
 type PendingArrival = { timer: number; deliver: () => void };
 const pendingArrivals = new Set<PendingArrival>();
 
-function scheduleArrival(name: string): void {
+function scheduleArrival(name: string, tutorialGate = false): void {
   const arrival: PendingArrival = { timer: 0, deliver: () => {} };
   arrival.deliver = () => {
     pendingArrivals.delete(arrival);
     queueStoryMessage("Даша", `Прибыли к «${name}». Приём.`);
+    if (tutorialGate && getState().tutorialStep === "dispatch") {
+      const state = getState();
+      const template = FIND_TEMPLATES.find(f => f.id === "find-wrapper");
+      if (template && !state.finds.some(f => f.id === template.id)) {
+        updateState({ finds: [...state.finds, { ...template, day: state.day, status: "new" }] });
+        addTableNews(1);
+      }
+      queueStoryMessage("Даша", "У ворот нашли старый фантик. Передали в штаб: используйте его для проверки инструментов реставрации.");
+      completeTutorialStep("dispatch");
+    }
     if (pendingArrivals.size === 0 && getState().hoursLeft === 0) {
       notify("Система", "Время на вылазку вышло. Завершите день, чтобы продолжить расследование утром.", "sys");
     }
@@ -62,20 +74,21 @@ function flushArrivals(): void {
 }
 
 btnSend.addEventListener("click", () => {
-  if (!selected || isTutorialRunning(getState().tutorialStep) || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
+  if (!selected || (isTutorialRunning(getState().tutorialStep) && !(getState().tutorialStep === "dispatch" && selected.id === "gate")) || getState().hoursLeft < GROUP_TRIP_COST_HOURS) return;
   const state = getState();
   const target = selected;
+  const tutorialGate = state.tutorialStep === "dispatch" && target.id === "gate";
   // story.ts listens for new visits and delivers finds immediately.
+  queueStoryMessage("Даша", `Идём к «${target.name}». Приём.`);
+  queueStoryMessage("Артём", "Приняли. Выдвигаемся.");
   updateState({
     hoursLeft: state.hoursLeft - GROUP_TRIP_COST_HOURS,
     visits: [...state.visits, target.id],
     groupPlaceId: target.id,
   });
   campMap?.setGroupPlace(target.id);
-  queueStoryMessage("Даша", `Идём к «${target.name}». Приём.`);
-  queueStoryMessage("Артём", "Приняли. Выдвигаемся.");
   selectPlace(null);
-  scheduleArrival(target.name);
+  scheduleArrival(target.name, tutorialGate);
 });
 
 function reportDay(report: DayReport): void {
@@ -105,14 +118,15 @@ subscribe(refreshSendButton);
 bindArchive();
 bindCaseBoard();
 
-// The story opens with Galina, then the training, then delayed field messages.
-if (startTutorial()) addTableNews(1);
+// The first trip has already happened; the player examines its folder in HQ.
+startTutorial();
 initIntegratedDesktop();
+initPrologue();
 initStory(bindTutorial);
 
 initCampMap(document.getElementById("pixi-host")!, PLACES, {
   onSelect: place => {
-    if (place.id === getState().groupPlaceId) {
+    if (place.id === getState().groupPlaceId && !(getState().tutorialStep === "dispatch" && place.id === "gate")) {
       selectPlace(null);
       notify("Штаб", `Группа уже находится у «${place.name}». Выберите другое место.`);
       return;

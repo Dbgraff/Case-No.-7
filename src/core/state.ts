@@ -34,8 +34,8 @@ export type GameState = {
 /** localStorage key. Bump the version suffix when the save format changes. */
 const STORAGE_KEY = "case7:save:v1";
 
-/** Place where the group starts the game. */
-export const START_PLACE_ID = "gate";
+/** The group has returned to HQ after the first field trip. */
+export const START_PLACE_ID = "hq";
 
 /** Hours available at the start of each day. */
 export const HOURS_PER_DAY = 5;

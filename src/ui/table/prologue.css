@@ -60,3 +60,128 @@
 }
 .case7-prologue.prologue-drawer-only.drawer-open .prologue-chat { transform:translateX(0); }
 .case7-prologue.prologue-drawer-only.drawer-open .prologue-drawer-toggle { left:min(340px,90vw); }
+
+/* Shared visual language with the monitor's "Поисковая группа" chat. */
+.id-table-workspace .case7-prologue .prologue-chat {
+  padding: 0;
+  background: #303b32;
+  color: #f1f3eb;
+  border-right: 1px solid #596d57;
+  font-family: var(--f-body, "Golos Text", Arial, sans-serif);
+  overflow: hidden;
+}
+.id-table-workspace .case7-prologue .prologue-contact {
+  min-height: 68px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex-shrink: 0;
+  background: #354337;
+  border-bottom: 1px solid #596d57;
+  letter-spacing: normal;
+}
+.id-table-workspace .case7-prologue .prologue-contact-avatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #fff;
+  font: 23px Arial, sans-serif;
+  background: #577666;
+}
+.id-table-workspace .case7-prologue .prologue-contact-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+.id-table-workspace .case7-prologue .prologue-contact-info strong {
+  font-size: 14px;
+  color: #fff;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+.id-table-workspace .case7-prologue .prologue-contact-info small {
+  font-size: 12px;
+  color: #c8d5c4;
+  font-weight: 400;
+}
+.id-table-workspace .case7-prologue .prologue-online-dot {
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: 1px;
+  border-radius: 50%;
+  background: #4dc795;
+}
+.id-table-workspace .case7-prologue .prologue-messages {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  padding: 11px;
+  margin: 12px;
+  gap: 10px;
+  overflow-y: auto;
+  background: #202a22;
+  border: 1px solid #526650;
+  border-radius: 9px;
+}
+.id-table-workspace .case7-prologue .prologue-message {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 97%;
+  padding: 11px 12px;
+  color: #f1f3eb;
+  background: #3a483c;
+  border: 1px solid #617460;
+  border-radius: 9px;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.id-table-workspace .case7-prologue .prologue-message.system {
+  color: #dce5d8;
+  background: #303d33;
+  border: 1px dashed #71826c;
+  font-size: 13px;
+}
+.id-table-workspace .case7-prologue .prologue-message-author {
+  display: block;
+  color: #f2d395;
+  font-size: 12px;
+  font-weight: 700;
+}
+.id-table-workspace .case7-prologue .prologue-message-text {
+  margin: 4px 0 0;
+  color: inherit;
+  font: inherit;
+}
+.id-table-workspace .case7-prologue .prologue-chat footer {
+  border-top: 1px solid #596d57;
+  padding: 12px 16px;
+  background: #354337;
+  color: #c8d5c4;
+  font-size: 11px;
+}
+.id-table-workspace .case7-prologue.prologue-drawer-only .prologue-drawer-toggle {
+  background: #354337;
+  border-color: #596d57;
+  color: #f1f3eb;
+}
+.id-table-workspace .case7-prologue.prologue-drawer-only .prologue-chat {
+  background: #303b32;
+}
+@media (max-width: 800px) {
+  .id-table-workspace .case7-prologue:not(.prologue-drawer-only) .prologue-chat {
+    min-height: 210px;
+    max-height: 250px;
+  }
+  .id-table-workspace .case7-prologue:not(.prologue-drawer-only) .prologue-messages {
+    min-height: 95px;
+    max-height: 145px;
+  }
+}

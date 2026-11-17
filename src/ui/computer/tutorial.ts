@@ -36,8 +36,8 @@ export function bindTutorial(): void {
   };
 
   onSpaceChange((space) => {
-    if (space === "table") completeTutorialStep("toTable");
-    else { checkArchive(); checkIntegratedArchive(); }
+    if (space === "computer") completeTutorialStep("computer");
+    if (space === "computer") { checkArchive(); checkIntegratedArchive(); }
   });
   onTabChange(checkArchive);
 
@@ -55,7 +55,7 @@ export function bindTutorial(): void {
   };
 
   document.addEventListener("case7:browser-page", (event: Event) => {
-    if ((event as CustomEvent<string>).detail === "archive") {
+    if ((event as CustomEvent<string>).detail === "archive" && getActiveSpace() === "computer") {
       completeTutorialStep("archive");
     }
   });
@@ -79,4 +79,5 @@ export function bindTutorial(): void {
     }
   };
   subscribe(render);
+  if (getActiveSpace() === "computer") completeTutorialStep("computer");
 }

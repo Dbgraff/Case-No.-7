@@ -27,7 +27,7 @@
   text-align: left;
 }
 
-.case7-prologue .prologue-stage > * {
+.case7-prologue .prologue-stage>* {
   width: 100%;
   max-width: 900px;
 }
@@ -59,7 +59,13 @@
   min-height: 335px;
   padding: 30px;
   border: 2px solid #876a42;
-  background: linear-gradient(150deg, #ad8e5e, #81603d);
+
+  background-color: #ac8e62;
+  background-image: url("/case-folder-texture.png");
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+
   box-shadow: 16px 20px 36px #0008;
   color: #241d16;
   text-align: left;
@@ -109,7 +115,13 @@
   min-width: 0;
   min-height: 220px;
   padding: 26px;
-  background: #dfd1b2;
+
+  background-color: #dfd1b2;
+  background-image: url("/archive-paper-texture.png");
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+
   box-shadow: 5px 9px 19px #0006;
   color: #3a3329;
   transform: rotate(-0.7deg);
@@ -401,8 +413,28 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .case7-prologue .prologue-folder,
   .id-table-workspace .case7-prologue .prologue-chat {
     transition: none;
   }
+}
+
+
+
+/* Текстуры бумаги*/
+
+.case7-prologue .prologue-folder {
+  box-shadow:
+    3px 5px 0 #6b4d30,
+    9px 13px 24px rgba(0, 0, 0, 0.4),
+    20px 25px 45px rgba(0, 0, 0, 0.22);
+}
+
+.case7-prologue .prologue-doc {
+  border: 1px solid rgba(103, 79, 49, 0.22);
+
+  box-shadow:
+    1px 2px 0 rgba(95, 75, 52, 0.5),
+    5px 9px 19px rgba(0, 0, 0, 0.35);
 }

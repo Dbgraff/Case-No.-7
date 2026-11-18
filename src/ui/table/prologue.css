@@ -1,187 +1,408 @@
-/* Intro case-review panel, confined to the restoration workspace. */
+/* 1. Основная сцена */
+
 .id-table-workspace .case7-prologue {
-  position: absolute; inset: 54px 0 0;
-  z-index: 70; display: grid; grid-template-columns: minmax(240px, 310px) minmax(0, 1fr);
+  position: absolute;
+  inset: 54px 0 0;
+  z-index: 70;
+  display: block;
+  min-height: calc(100% - 54px);
+  color: #eee5d5;
   background: linear-gradient(115deg, #282722e8, #342d24dc);
-  color: #eee5d5; min-height: calc(100% - 54px);
 }
-.id-table-workspace .case7-prologue[hidden] { display: none !important; }
-.prologue-chat { min-width: 0; padding: 25px 17px; background: #17241e; display: flex; flex-direction: column; border-right: 1px solid #657062; }
-.prologue-chat header { font: 600 12px/1.5 Arial,sans-serif; letter-spacing: 1px; display: flex; justify-content: space-between; border-bottom: 1px solid #526255; padding-bottom: 15px; }
-.prologue-chat header b { color: #b9d09e; }
-.prologue-chat footer { font: 11px Arial,sans-serif; color: #8fa297; border-top: 1px solid #526255; padding-top: 12px; }
-.prologue-messages { display: flex; flex-direction: column; gap: 12px; padding: 22px 0; overflow-y: auto; flex: 1; min-height: 0; max-height: 70vh; }
-.prologue-message { border: 1px solid #526258; border-radius: 9px; padding: 13px; background: #2b3c32; font: 13px/1.55 Arial,sans-serif; }
-.prologue-message.system { background: #24302e; }
-.prologue-message strong { color: #e4d0a9; }
-.prologue-message p { margin: 6px 0 0; }
-.prologue-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-width: 0; padding: 35px clamp(18px, 4vw, 70px); text-align: left; }
-.prologue-stage > * { width: 100%; max-width: 900px; }
-.prologue-kicker { font: 12px Arial,sans-serif; letter-spacing: 2px; color: #d6b98c; }
-.prologue-stage h2 { margin: 0; font: normal 35px Georgia,serif; }
-.prologue-description { font: 15px/1.65 Arial,sans-serif; color: #d8cdbc; margin: 0; }
-.prologue-folder { min-height: 335px; padding: 30px; border: 2px solid #876a42; background: linear-gradient(150deg, #ad8e5e, #81603d); box-shadow: 16px 20px 36px #0008; color: #241d16; cursor: pointer; display: flex; flex-direction: column; gap: 26px; align-items: flex-start; text-align: left; transform: rotate(-1deg); transition: transform .15s; }
-.prologue-folder:hover { transform: rotate(0); }
-.folder-tab { letter-spacing: 2px; font: 12px Arial,sans-serif; }
-.folder-number { font: 46px Georgia,serif; border-block: 2px solid #4c3829; padding-block: 15px; width: 100%; }
-.folder-number em { color: #6e3026; }
-.folder-caption { font: 15px Georgia,serif; }
-.folder-action { font: bold 15px Arial,sans-serif; margin-top: auto; }
-.prologue-docs { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.prologue-doc { min-width: 0; min-height: 220px; padding: 26px; background: #dfd1b2; color: #3a3329; box-shadow: 5px 9px 19px #0006; transform: rotate(-.7deg); }
-.prologue-doc:nth-child(2) { transform: rotate(1deg); }
-.prologue-doc small { font: 11px/1.5 Arial,sans-serif; letter-spacing: 1px; }
-.prologue-doc h3 { font: 22px Georgia,serif; margin: 17px 0; }
-.prologue-doc p { font: 16px/1.9 Georgia,serif; }
-.prologue-doc mark { background: #e3bb7b; color: #432c18; padding: 2px 5px; }
-.prologue-answers { border: 1px solid #7e796c; padding: 18px; display: grid; gap: 13px; font: 14px/1.5 Arial,sans-serif; }
-.prologue-answers legend { padding-inline: 8px; }
-.prologue-answers label { display: flex; align-items: baseline; gap: 9px; cursor: pointer; }
-.prologue-confirm { width: auto !important; align-self: flex-start; border: 1px solid #ddc39a; background: #c7a772; padding: 12px 22px; font: bold 14px Arial,sans-serif; cursor: pointer; color: #282118; }
-#prologueFeedback { min-height: 17px; font: 13px Arial,sans-serif; color: #e7c59d; }
-@media(max-width:800px) { .id-table-workspace .case7-prologue { grid-template-columns: 1fr; position: relative; inset: auto; }.prologue-chat { max-height: 240px; }.prologue-messages { max-height: 160px; }.prologue-docs { grid-template-columns:1fr; } }
 
-.case7-prologue .prologue-drawer-toggle { display:none; }
-.id-table-workspace .case7-prologue.prologue-drawer-only {
-  inset:54px auto auto 0; position:absolute; display:block; width:0; height:0;
-  min-height:0; background:transparent; overflow:visible; pointer-events:none;
+.id-table-workspace .case7-prologue[hidden],
+.case7-prologue .prologue-stage[hidden] {
+  display: none !important;
 }
-.case7-prologue.prologue-drawer-only .prologue-stage { display:none !important; }
-.case7-prologue.prologue-drawer-only .prologue-drawer-toggle {
-  display:block; position:absolute; left:0; top:16px; width:49px; height:55px;
-  border:1px solid #aa9c83; border-radius:0 8px 8px 0; color:#f1ddbc;
-  background:#1e3028; font:22px Arial,sans-serif; cursor:pointer; pointer-events:auto;
-}
-.prologue-drawer-toggle span { font:12px Arial,sans-serif; color:#eed1a4; }
-.case7-prologue.prologue-drawer-only .prologue-chat {
-  position:absolute; left:0; top:0; width:min(340px,90vw); height:calc(100dvh - 54px);
-  transform:translateX(-105%); transition: transform .2s; pointer-events:auto;
-  box-shadow:10px 0 20px #0009;
-}
-.case7-prologue.prologue-drawer-only.drawer-open .prologue-chat { transform:translateX(0); }
-.case7-prologue.prologue-drawer-only.drawer-open .prologue-drawer-toggle { left:min(340px,90vw); }
 
-/* Shared visual language with the monitor's "Поисковая группа" chat. */
-.id-table-workspace .case7-prologue .prologue-chat {
-  padding: 0;
-  background: #303b32;
+.case7-prologue .prologue-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-width: 0;
+  min-height: 100%;
+  padding: 90px clamp(18px, 4vw, 70px) 35px;
+  text-align: left;
+}
+
+.case7-prologue .prologue-stage > * {
+  width: 100%;
+  max-width: 900px;
+}
+
+.case7-prologue .prologue-kicker {
+  color: #d6b98c;
+  font: 12px Arial, sans-serif;
+  letter-spacing: 2px;
+}
+
+.case7-prologue .prologue-stage h2 {
+  margin: 0;
+  font: normal 35px Georgia, serif;
+}
+
+.case7-prologue .prologue-description {
+  margin: 0;
+  color: #d8cdbc;
+  font: 15px/1.65 Arial, sans-serif;
+}
+
+/* 2. Папка дела. Текстуру меняем отдельно во второй задаче. */
+
+.case7-prologue .prologue-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 26px;
+  min-height: 335px;
+  padding: 30px;
+  border: 2px solid #876a42;
+  background: linear-gradient(150deg, #ad8e5e, #81603d);
+  box-shadow: 16px 20px 36px #0008;
+  color: #241d16;
+  text-align: left;
+  cursor: pointer;
+  transform: rotate(-1deg);
+  transition: transform 150ms ease;
+}
+
+.case7-prologue .prologue-folder:hover {
+  transform: rotate(0);
+}
+
+.case7-prologue .folder-tab {
+  font: 12px Arial, sans-serif;
+  letter-spacing: 2px;
+}
+
+.case7-prologue .folder-number {
+  width: 100%;
+  padding-block: 15px;
+  border-block: 2px solid #4c3829;
+  font: 46px Georgia, serif;
+}
+
+.case7-prologue .folder-number em {
+  color: #6e3026;
+}
+
+.case7-prologue .folder-caption {
+  font: 15px Georgia, serif;
+}
+
+.case7-prologue .folder-action {
+  margin-top: auto;
+  font: bold 15px Arial, sans-serif;
+}
+
+/* 3. Сопоставление документов */
+
+.case7-prologue .prologue-docs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.case7-prologue .prologue-doc {
+  min-width: 0;
+  min-height: 220px;
+  padding: 26px;
+  background: #dfd1b2;
+  box-shadow: 5px 9px 19px #0006;
+  color: #3a3329;
+  transform: rotate(-0.7deg);
+}
+
+.case7-prologue .prologue-doc:nth-child(2) {
+  transform: rotate(1deg);
+}
+
+.case7-prologue .prologue-doc small {
+  font: 11px/1.5 Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+.case7-prologue .prologue-doc h3 {
+  margin: 17px 0;
+  font: 22px Georgia, serif;
+}
+
+.case7-prologue .prologue-doc p {
+  font: 16px/1.9 Georgia, serif;
+}
+
+.case7-prologue .prologue-doc mark {
+  padding: 2px 5px;
+  color: #432c18;
+  background: #e3bb7b;
+}
+
+.case7-prologue .prologue-answers {
+  display: grid;
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid #7e796c;
+  font: 14px/1.5 Arial, sans-serif;
+}
+
+.case7-prologue .prologue-answers legend {
+  padding-inline: 8px;
+}
+
+.case7-prologue .prologue-answers label {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.case7-prologue .prologue-confirm {
+  width: auto !important;
+  align-self: flex-start;
+  padding: 12px 22px;
+  border: 1px solid #ddc39a;
+  background: #c7a772;
+  color: #282118;
+  font: bold 14px Arial, sans-serif;
+  cursor: pointer;
+}
+
+.case7-prologue #prologueFeedback {
+  min-height: 17px;
+  color: #e7c59d;
+  font: 13px Arial, sans-serif;
+}
+
+/* 4. Кнопка сообщений (справа сверху) */
+
+.case7-prologue .prologue-chat-toggle {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 102;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid #60745f;
+  border-radius: 12px;
+  background: #354337;
+  box-shadow: 0 5px 18px #0005;
   color: #f1f3eb;
-  border-right: 1px solid #596d57;
-  font-family: var(--f-body, "Golos Text", Arial, sans-serif);
-  overflow: hidden;
+  font: 600 13px Arial, sans-serif;
+  cursor: pointer;
 }
-.id-table-workspace .case7-prologue .prologue-contact {
-  min-height: 68px;
-  padding: 12px 16px;
+
+.case7-prologue .prologue-chat-toggle:hover,
+.case7-prologue .prologue-chat-toggle:focus-visible {
+  background: #455846;
+}
+
+.case7-prologue .prologue-chat-toggle-icon {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.case7-prologue .prologue-chat-unread:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #ba8158;
+  color: #201c18;
+  font: 700 11px Arial, sans-serif;
+}
+
+/* 5. Popup сообщений: поверх стола, без изменения сетки */
+
+.id-table-workspace .case7-prologue .prologue-chat {
+  position: absolute;
+  top: 74px;
+  right: 22px;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  width: min(370px, calc(100vw - 36px));
+  height: min(540px, calc(100dvh - 170px));
+  min-height: 260px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #596d57;
+  border-radius: 15px;
+  background: #303b32;
+  box-shadow: 0 18px 48px #0009;
+  color: #f1f3eb;
+  font-family: var(--f-body, "Golos Text", Arial, sans-serif);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+}
+
+.id-table-workspace .case7-prologue.chat-popup-open .prologue-chat {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.case7-prologue .prologue-contact {
   display: flex;
   align-items: center;
   gap: 11px;
   flex-shrink: 0;
-  background: #354337;
+  min-height: 68px;
+  padding: 12px 16px;
   border-bottom: 1px solid #596d57;
-  letter-spacing: normal;
+  background: #354337;
 }
-.id-table-workspace .case7-prologue .prologue-contact-avatar {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
+
+.case7-prologue .prologue-contact-avatar {
   display: grid;
   place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
+  background: #577666;
   color: #fff;
   font: 23px Arial, sans-serif;
-  background: #577666;
 }
-.id-table-workspace .case7-prologue .prologue-contact-info {
+
+.case7-prologue .prologue-contact-info {
   display: flex;
-  min-width: 0;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
-.id-table-workspace .case7-prologue .prologue-contact-info strong {
-  font-size: 14px;
+
+.case7-prologue .prologue-contact-info strong {
   color: #fff;
-  letter-spacing: 0;
+  font-size: 14px;
   font-weight: 600;
 }
-.id-table-workspace .case7-prologue .prologue-contact-info small {
-  font-size: 12px;
+
+.case7-prologue .prologue-contact-info small {
   color: #c8d5c4;
-  font-weight: 400;
+  font-size: 12px;
 }
-.id-table-workspace .case7-prologue .prologue-online-dot {
+
+.case7-prologue .prologue-online-dot {
+  display: inline-block;
   width: 6px;
   height: 6px;
-  display: inline-block;
   margin-right: 6px;
-  vertical-align: 1px;
   border-radius: 50%;
   background: #4dc795;
+  vertical-align: 1px;
 }
-.id-table-workspace .case7-prologue .prologue-messages {
-  flex: 1;
-  min-height: 0;
-  max-height: none;
-  padding: 11px;
-  margin: 12px;
-  gap: 10px;
-  overflow-y: auto;
-  background: #202a22;
-  border: 1px solid #526650;
-  border-radius: 9px;
-}
-.id-table-workspace .case7-prologue .prologue-message {
-  align-self: flex-start;
-  width: fit-content;
-  max-width: 97%;
-  padding: 11px 12px;
+
+.case7-prologue .prologue-chat-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 8px;
+  background: #ffffff14;
   color: #f1f3eb;
-  background: #3a483c;
-  border: 1px solid #617460;
-  border-radius: 9px;
-  font-size: 14px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
+  font: 24px/1 Arial, sans-serif;
+  cursor: pointer;
 }
-.id-table-workspace .case7-prologue .prologue-message.system {
-  color: #dce5d8;
-  background: #303d33;
-  border: 1px dashed #71826c;
-  font-size: 13px;
+
+.case7-prologue .prologue-chat-close:hover {
+  background: #ffffff2a;
 }
-.id-table-workspace .case7-prologue .prologue-message-author {
-  display: block;
-  color: #f2d395;
-  font-size: 12px;
-  font-weight: 700;
+
+
+/* История сообщений.
+   Внешний вид пузырьков задаётся общими стилями
+   в integratedDesktop.css. */
+
+.case7-prologue .prologue-messages {
+  margin: 12px;
 }
-.id-table-workspace .case7-prologue .prologue-message-text {
-  margin: 4px 0 0;
-  color: inherit;
-  font: inherit;
-}
-.id-table-workspace .case7-prologue .prologue-chat footer {
-  border-top: 1px solid #596d57;
+
+.case7-prologue .prologue-chat footer {
+  flex-shrink: 0;
   padding: 12px 16px;
+  border-top: 1px solid #596d57;
   background: #354337;
   color: #c8d5c4;
   font-size: 11px;
 }
-.id-table-workspace .case7-prologue.prologue-drawer-only .prologue-drawer-toggle {
-  background: #354337;
-  border-color: #596d57;
-  color: #f1f3eb;
+
+
+/* 7. После пролога: только кнопка и popup, без перекрытия стола */
+
+.id-table-workspace .case7-prologue.prologue-drawer-only {
+  position: absolute;
+  inset: 68px 20px auto auto;
+  display: block;
+  width: 0;
+  height: 0;
+  min-height: 0;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
 }
+
+.case7-prologue.prologue-drawer-only .prologue-stage {
+  display: none !important;
+}
+
+.case7-prologue.prologue-drawer-only .prologue-chat-toggle {
+  top: 0;
+  right: 0;
+  pointer-events: auto;
+}
+
 .id-table-workspace .case7-prologue.prologue-drawer-only .prologue-chat {
-  background: #303b32;
+  top: 54px;
+  right: 0;
 }
+
+/* 8. Адаптивность */
+
 @media (max-width: 800px) {
-  .id-table-workspace .case7-prologue:not(.prologue-drawer-only) .prologue-chat {
-    min-height: 210px;
-    max-height: 250px;
+  .case7-prologue .prologue-docs {
+    grid-template-columns: 1fr;
   }
-  .id-table-workspace .case7-prologue:not(.prologue-drawer-only) .prologue-messages {
-    min-height: 95px;
-    max-height: 145px;
+
+  .case7-prologue .prologue-stage {
+    padding: 90px 18px 28px;
+  }
+
+  .case7-prologue .prologue-chat-toggle {
+    right: 12px;
+  }
+
+  .id-table-workspace .case7-prologue .prologue-chat {
+    right: 12px;
+    width: min(370px, calc(100vw - 24px));
+    height: min(500px, calc(100dvh - 180px));
+    min-height: 0;
+  }
+
+  .id-table-workspace .case7-prologue.prologue-drawer-only {
+    right: 12px;
+  }
+
+  .id-table-workspace .case7-prologue.prologue-drawer-only .prologue-chat {
+    right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case7-prologue .prologue-folder,
+  .id-table-workspace .case7-prologue .prologue-chat {
+    transition: none;
   }
 }

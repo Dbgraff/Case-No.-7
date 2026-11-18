@@ -17,43 +17,154 @@ export function initPrologue(): void {
   const host = document.createElement("section");
   host.className = "case7-prologue";
   host.setAttribute("aria-label", "Изучение дела № 7");
+  
   host.innerHTML = `
-    <button type="button" class="prologue-drawer-toggle" id="prologueDrawerToggle" aria-label="Открыть сообщения">✉ <span id="prologueDrawerUnread"></span></button>
-    <aside class="prologue-chat" aria-label="Связь со штабом">
-      <header class="prologue-contact"><span class="prologue-contact-avatar" aria-hidden="true">✉</span><span class="prologue-contact-info"><strong>Поисковая группа</strong><small><span class="prologue-online-dot"></span>На связи</small></span></header>
-      <div class="prologue-messages" id="prologueMessages" aria-live="polite"></div>
+    <button
+      type="button"
+      class="prologue-chat-toggle"
+      id="prologueChatToggle"
+      aria-label="Открыть сообщения"
+      aria-controls="prologueChatPopup"
+      aria-expanded="false"
+    >
+      <span class="prologue-chat-toggle-icon" aria-hidden="true">✉</span>
+      <span>Сообщения</span>
+      <span
+        class="prologue-chat-unread"
+        id="prologueChatUnread"
+        hidden
+      ></span>
+    </button>
+
+    <aside
+      class="prologue-chat"
+      id="prologueChatPopup"
+      aria-label="Сообщения поисковой группы"
+      aria-hidden="true"
+    >
+      <header class="prologue-contact">
+        <span class="prologue-contact-avatar" aria-hidden="true">✉</span>
+
+        <span class="prologue-contact-info">
+          <strong>Поисковая группа</strong>
+          <small>
+            <span class="prologue-online-dot"></span>
+            На связи
+          </small>
+        </span>
+
+        <button
+          type="button"
+          class="prologue-chat-close"
+          id="prologueChatClose"
+          aria-label="Закрыть сообщения"
+        >×</button>
+      </header>
+
+      <div
+        class="prologue-messages"
+        id="prologueMessages"
+        role="log"
+        aria-label="История сообщений"
+      ></div>
+
       <footer>Сообщения поисковой группы</footer>
     </aside>
+
     <div class="prologue-stage" id="prologueStage"></div>
   `;
+
   workspace.appendChild(host);
+
   const stage = host.querySelector<HTMLElement>("#prologueStage")!;
   const messages = host.querySelector<HTMLElement>("#prologueMessages")!;
-  const toggle = host.querySelector<HTMLButtonElement>("#prologueDrawerToggle")!;
-  const unread = host.querySelector<HTMLElement>("#prologueDrawerUnread")!;
-  let unreadCount = 0;
-  toggle.addEventListener("click", () => {
-    host.classList.toggle("drawer-open");
-    if (host.classList.contains("drawer-open")) { unreadCount = 0; unread.textContent = ""; }
-  });
+  const popup = host.querySelector<HTMLElement>("#prologueChatPopup")!;
+  const toggle = host.querySelector<HTMLButtonElement>("#prologueChatToggle")!;
+  const close = host.querySelector<HTMLButtonElement>("#prologueChatClose")!;
+  const unread = host.querySelector<HTMLElement>("#prologueChatUnread")!;
 
-  const append = ({ who, text, kind }: ChatMessage): void => {
-    const box = document.createElement("div");
-    box.className = "prologue-message" + (kind === "sys" ? " system" : kind === "story" ? " story" : "");
-    const author = document.createElement("strong");
-    author.className = "prologue-message-author";
-    author.textContent = who;
-    const body = document.createElement("p");
-    body.className = "prologue-message-text";
-    body.textContent = text;
-    box.append(author, body);
-    messages.appendChild(box);
-    messages.scrollTop = messages.scrollHeight;
-    if (host.classList.contains("prologue-drawer-only") && !host.classList.contains("drawer-open")) {
-      unreadCount++;
-      unread.textContent = String(unreadCount);
+  let unreadCount = 0;
+
+  const setPopupOpen = (open: boolean): void => {
+    host.classList.toggle("chat-popup-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute(
+      "aria-label",
+      open ? "Закрыть сообщения" : "Открыть сообщения",
+    );
+
+    popup.setAttribute("aria-hidden", String(!open));
+    popup.inert = !open;
+
+    if (open) {
+      unreadCount = 0;
+      unread.textContent = "";
+      unread.hidden = true;
+      messages.scrollTop = messages.scrollHeight;
     }
   };
+
+  setPopupOpen(false);
+
+  toggle.addEventListener("click", () => {
+    setPopupOpen(!host.classList.contains("chat-popup-open"));
+  });
+
+  close.addEventListener("click", () => {
+    setPopupOpen(false);
+    toggle.focus();
+  });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (!host.classList.contains("chat-popup-open")) return;
+
+    const target = event.target;
+
+    if (
+      target instanceof Node &&
+      !popup.contains(target) &&
+      !toggle.contains(target)
+    ) {
+      setPopupOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      host.classList.contains("chat-popup-open")
+    ) {
+      setPopupOpen(false);
+      toggle.focus();
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) setPopupOpen(false);
+  });
+
+
+
+  const append = ({ who, text, kind }: ChatMessage): void => {
+    const bubble = document.createElement("div");
+    bubble.className = "bub" + (kind ? ` ${kind}` : "");
+
+    const author = document.createElement("b");
+    author.textContent = who;
+
+    bubble.appendChild(author);
+    bubble.appendChild(document.createTextNode(text));
+
+    messages.appendChild(bubble);
+    messages.scrollTop = messages.scrollHeight;
+
+    if (!host.classList.contains("chat-popup-open")) {
+      unreadCount++;
+      unread.textContent = String(unreadCount);
+      unread.hidden = false;
+    }
+  };
+
   document.addEventListener("case7:chat-message", (e: Event) => {
     append((e as CustomEvent<ChatMessage>).detail);
   });
@@ -66,7 +177,6 @@ export function initPrologue(): void {
     const active = step === "caseFolder" || step === "caseCompare";
     host.hidden = false;
     host.classList.toggle("prologue-drawer-only", !active);
-    if (active) { host.classList.remove("drawer-open"); unreadCount = 0; unread.textContent = ""; }
     stage.hidden = !active;
     if (!active) return;
 

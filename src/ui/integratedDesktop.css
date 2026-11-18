@@ -580,12 +580,17 @@
   font-size: 12px;
 }
 
-.integrated-desktop .id-chat-content #chat {
+
+/*общие стили сообщений*/
+
+.integrated-desktop :is(
+  .id-chat-content #chat,
+  .case7-prologue .prologue-messages
+) {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  max-height: none;
   overflow-y: auto;
   gap: 10px;
   padding: 11px;
@@ -594,7 +599,10 @@
   border-radius: 9px;
 }
 
-.integrated-desktop .id-chat-content .bub {
+.integrated-desktop :is(
+  .id-chat-content #chat,
+  .case7-prologue .prologue-messages
+) .bub {
   max-width: 97%;
   padding: 11px 12px;
   color: #f1f3eb;
@@ -606,27 +614,40 @@
   overflow-wrap: anywhere;
 }
 
-.integrated-desktop .id-chat-content .bub b {
+.integrated-desktop :is(
+  .id-chat-content #chat,
+  .case7-prologue .prologue-messages
+) .bub b {
   color: #f2d395;
   font-size: 12px;
   font-weight: 700;
 }
 
-.integrated-desktop .id-chat-content .bub.me {
+.integrated-desktop :is(
+  .id-chat-content #chat,
+  .case7-prologue .prologue-messages
+) .bub.me {
   background: #4b583e;
   border-color: #76865d;
 }
 
-.integrated-desktop .id-chat-content .bub.sys {
+.integrated-desktop :is(
+  .id-chat-content #chat,
+  .case7-prologue .prologue-messages
+) .bub.sys {
   color: #dce5d8;
   background: #303d33;
   border: 1px dashed #71826c;
   font-size: 13px;
 }
 
-.integrated-desktop .id-chat-content .bub.find {
+.integrated-desktop :is(
+  .id-chat-content #chat,
+  .case7-prologue .prologue-messages
+) .bub.find {
   border-left: 3px solid var(--ui-red);
 }
+
 
 /* NOTES */
 

@@ -1,266 +1,708 @@
-/* 1. Основная сцена */
+
+/* ==========================================================
+   ДЕЛО № 7 — ПРОЛОГ
+
+   Основа: существующий фон реставрационного стола.
+
+   Используемые изображения:
+   /case-folder-texture.png
+   /archive-paper-texture.png
+
+   Фон restoration-workbench.png уже выводится
+   через restorationDesk.css.
+   ========================================================== */
+
+/* 1. СЦЕНА */
 
 .id-table-workspace .case7-prologue {
   position: absolute;
   inset: 54px 0 0;
   z-index: 70;
-  display: block;
+
+  width: 100%;
   min-height: calc(100% - 54px);
+
+  background: transparent;
   color: #eee5d5;
-  background: linear-gradient(115deg, #282722e8, #342d24dc);
 }
 
 .id-table-workspace .case7-prologue[hidden],
-.case7-prologue .prologue-stage[hidden] {
+.case7-prologue [hidden] {
   display: none !important;
 }
 
 .case7-prologue .prologue-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  min-width: 0;
   min-height: 100%;
-  padding: 90px clamp(18px, 4vw, 70px) 35px;
-  text-align: left;
 }
 
-.case7-prologue .prologue-stage>* {
+.case7-prologue .prologue-desk-scene {
+  position: relative;
+
   width: 100%;
-  max-width: 900px;
+  min-height: max(650px, calc(100dvh - 54px));
+
+  isolation: isolate;
 }
 
-.case7-prologue .prologue-kicker {
-  color: #d6b98c;
-  font: 12px Arial, sans-serif;
-  letter-spacing: 2px;
+/* 2. ВСПЛЫВАЮЩИЕ ПОДСКАЗКИ */
+
+.case7-prologue .prologue-tip {
+  position: absolute;
+  z-index: 10;
+
+  width: min(255px, 24vw);
+  box-sizing: border-box;
+  padding: 16px 19px;
+
+  background:
+    #e9ddc3
+    url("/archive-paper-texture.png")
+    center / cover no-repeat;
+
+  color: #3b3024;
+
+  border: 1px solid #a18c6c;
+  border-radius: 3px;
+
+  box-shadow:
+    2px 3px 0 #a79474,
+    7px 11px 22px #0006;
+
+  transform: rotate(-1deg);
 }
 
-.case7-prologue .prologue-stage h2 {
+.case7-prologue .prologue-tip-heading {
+  display: block;
+
+  margin-bottom: 10px;
+  padding-bottom: 9px;
+
+  border-bottom: 1px solid #9c866a;
+
+  font: 700 11px/1.4 Arial, sans-serif;
+  letter-spacing: 0.09em;
+  color: #66503a;
+}
+
+.case7-prologue .prologue-tip p {
   margin: 0;
-  font: normal 35px Georgia, serif;
+
+  font: 14px/1.55 Georgia, serif;
+  color: #463729;
 }
 
-.case7-prologue .prologue-description {
-  margin: 0;
-  color: #d8cdbc;
-  font: 15px/1.65 Arial, sans-serif;
+/* Верхняя подсказка */
+
+.case7-prologue .prologue-tip--intro {
+  top: 9%;
+  left: 17%;
+
+  transform: rotate(-2deg);
 }
 
-/* 2. Папка дела. Текстуру меняем отдельно во второй задаче. */
+/* Нижняя подсказка */
 
-.case7-prologue .prologue-folder {
+.case7-prologue .prologue-tip--action {
+  top: 74%;
+  left: 53%;
+
+  transform: rotate(2deg);
+}
+
+/* 3. ЗАКРЫТАЯ ПАПКА */
+
+.case7-prologue .prologue-folder-closed {
+  position: absolute;
+  top: 25%;
+  left: 28%;
+
+  z-index: 3;
+  isolation: isolate;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 26px;
-  min-height: 335px;
-  padding: 30px;
-  border: 2px solid #876a42;
+  gap: 22px;
 
-  background-color: #ac8e62;
-  background-image: url("/case-folder-texture.png");
-  background-position: center;
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
+  box-sizing: border-box;
 
-  box-shadow: 16px 20px 36px #0008;
-  color: #241d16;
+  width: clamp(245px, 23vw, 355px);
+  aspect-ratio: 210 / 297;
+
+  padding: 38px 29px 29px;
+
+  background: #c9bea7;
+  color: #3c3328;
+
+  border: 1px solid #97866e;
+  border-radius: 2px;
+
   text-align: left;
   cursor: pointer;
-  transform: rotate(-1deg);
-  transition: transform 150ms ease;
+
+  transform: rotate(-4deg);
+
+  box-shadow:
+    3px 5px 0 #8d7c64,
+    12px 17px 27px #0007,
+    20px 25px 36px #0003;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.case7-prologue .prologue-folder:hover {
-  transform: rotate(0);
+/* Картон — отдельным слоем */
+
+.case7-prologue .prologue-folder-closed::before,
+.case7-prologue .prologue-folder-left::before,
+.case7-prologue .prologue-folder-right::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  content: "";
+
+  background:
+    url("/case-folder-texture.png")
+    center / cover no-repeat;
+
+  filter:
+    grayscale(0.65)
+    brightness(1.2)
+    contrast(0.88);
+
+  opacity: 0.58;
+  pointer-events: none;
 }
 
-.case7-prologue .folder-tab {
-  font: 12px Arial, sans-serif;
-  letter-spacing: 2px;
+/* Язычок закрытой папки */
+
+.case7-prologue .prologue-folder-closed::after {
+  position: absolute;
+  left: -1px;
+  top: -17px;
+
+  content: "";
+
+  width: 110px;
+  height: 17px;
+
+  border: 1px solid #97866e;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+
+  background: #c9bea7;
 }
 
-.case7-prologue .folder-number {
+.case7-prologue .prologue-folder-closed:hover,
+.case7-prologue .prologue-folder-closed:focus-visible {
+  transform: rotate(-2deg) translateY(-6px);
+
+  box-shadow:
+    3px 5px 0 #8d7c64,
+    17px 24px 36px #0008;
+}
+
+/* Надписи на обложке */
+
+.case7-prologue .prologue-folder-tab {
+  font: 600 10px/1.5 Arial, sans-serif;
+  letter-spacing: 0.1em;
+  color: #5f5344;
+}
+
+.case7-prologue .prologue-folder-heading {
   width: 100%;
-  padding-block: 15px;
-  border-block: 2px solid #4c3829;
-  font: 46px Georgia, serif;
+
+  margin-top: 20px;
+  padding: 18px 0;
+
+  border-top: 1px solid #82725c;
+  border-bottom: 1px solid #82725c;
+
+  font: normal 40px/1.15 Georgia, serif;
 }
 
-.case7-prologue .folder-number em {
-  color: #6e3026;
+.case7-prologue .prologue-folder-heading em {
+  font-style: normal;
+  color: #82564c;
 }
 
-.case7-prologue .folder-caption {
-  font: 15px Georgia, serif;
+.case7-prologue .prologue-folder-subtitle {
+  color: #514638;
+  font: 16px/1.5 Georgia, serif;
 }
 
-.case7-prologue .folder-action {
+.case7-prologue .prologue-folder-action {
   margin-top: auto;
-  font: bold 15px Arial, sans-serif;
+
+  font: 700 14px Arial, sans-serif;
+  color: #47392b;
 }
 
-/* 3. Сопоставление документов */
+/* 4. ОТКРЫТАЯ ПАПКА */
 
-.case7-prologue .prologue-docs {
+.case7-prologue .prologue-open-folder {
+  position: absolute;
+
+  top: 23%;
+  left: 12%;
+
+  z-index: 2;
+
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+
+  width: min(53%, 750px);
+  aspect-ratio: 420 / 297;
+
+  filter: drop-shadow(10px 17px 13px #0007);
+
+  transform: rotate(-2deg);
 }
 
-.case7-prologue .prologue-doc {
+.case7-prologue .prologue-folder-left,
+.case7-prologue .prologue-folder-right {
+  position: relative;
+  isolation: isolate;
+
   min-width: 0;
-  min-height: 220px;
-  padding: 26px;
 
-  background-color: #dfd1b2;
-  background-image: url("/archive-paper-texture.png");
-  background-position: center;
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-
-  box-shadow: 5px 9px 19px #0006;
-  color: #3a3329;
-  transform: rotate(-0.7deg);
+  background: #c9bea7;
+  border: 1px solid #95846a;
 }
 
-.case7-prologue .prologue-doc:nth-child(2) {
-  transform: rotate(1deg);
+.case7-prologue .prologue-folder-left {
+  border-right: 3px solid #826d54;
+
+  transform:
+    perspective(1000px)
+    rotateY(-9deg);
+
+  transform-origin: right center;
+
+  box-shadow:
+    inset -14px 0 21px #45351f23;
 }
 
-.case7-prologue .prologue-doc small {
-  font: 11px/1.5 Arial, sans-serif;
-  letter-spacing: 1px;
+.case7-prologue .prologue-folder-right {
+  border-left: 0;
+  padding: 15px;
+
+  box-shadow:
+    inset 13px 0 16px #45351f1c;
 }
 
-.case7-prologue .prologue-doc h3 {
-  margin: 17px 0;
-  font: 22px Georgia, serif;
+.case7-prologue .prologue-inner-stamp {
+  position: absolute;
+  top: 18%;
+  left: 14%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  font: 25px Georgia, serif;
+  color: #766750;
+
+  opacity: 0.72;
+  transform: rotate(-7deg);
 }
 
-.case7-prologue .prologue-doc p {
-  font: 16px/1.9 Georgia, serif;
+.case7-prologue .prologue-inner-stamp small {
+  font-size: 17px;
 }
 
-.case7-prologue .prologue-doc mark {
+.case7-prologue .prologue-folder-inner-label {
+  display: block;
+
+  color: #685947;
+  font: 600 9px/1.4 Arial, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+/* 5. ДОКУМЕНТЫ В ПАПКЕ */
+
+.case7-prologue .prologue-document-stack {
+  position: relative;
+  height: 90%;
+  margin-top: 12px;
+}
+
+.case7-prologue .prologue-document,
+.case7-prologue .prologue-reading-paper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  box-sizing: border-box;
+
+  background:
+    #dfd1b2
+    url("/archive-paper-texture.png")
+    center / cover no-repeat;
+
+  color: #3d3429;
+  border: 1px solid #a79475;
+
+  text-align: left;
+  box-shadow: 4px 6px 13px #0005;
+}
+
+.case7-prologue .prologue-document {
+  position: absolute;
+
+  width: 84%;
+  height: 98%;
+  padding: 19px;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+/* Нижний документ немного виден сверху и справа */
+
+.case7-prologue .prologue-document--request {
+  top: 0;
+  left: 13%;
+
+  z-index: 1;
+
+  transform: rotate(6deg);
+}
+
+/* Верхний документ сдвинут влево и вниз */
+
+.case7-prologue .prologue-document--diary {
+  top: 12%;
+  left: 3%;
+
+  z-index: 2;
+
+  transform: rotate(-5deg);
+}
+
+.case7-prologue .prologue-document:hover,
+.case7-prologue .prologue-document:focus-visible {
+  z-index: 4;
+
+  transform: translateY(-12px) rotate(0deg);
+
+  box-shadow:
+    5px 12px 20px #0007;
+}
+
+.case7-prologue .prologue-document.is-reading {
+  opacity: 0.48;
+}
+
+/* Оформление содержимого */
+
+.case7-prologue .prologue-paper-label {
+  color: #685945;
+  font: 700 10px/1.5 Arial, sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.case7-prologue .prologue-paper-rule {
+  display: block;
+
+  width: 100%;
+  height: 1px;
+
+  margin: 12px 0 16px;
+
+  background: #947b5f;
+}
+
+.case7-prologue .prologue-paper-title {
+  font: normal 21px/1.25 Georgia, serif;
+}
+
+.case7-prologue .prologue-paper-body {
+  margin-top: 17px;
+
+  font: 15px/1.55 Georgia, serif;
+}
+
+.case7-prologue .prologue-paper-body p {
+  margin: 0 0 12px;
+}
+
+.case7-prologue .prologue-paper-body mark {
   padding: 2px 5px;
-  color: #432c18;
-  background: #e3bb7b;
+
+  background: #dfb778;
+  color: #432e1c;
+}
+
+.case7-prologue .prologue-paper-footer {
+  margin-top: auto;
+
+  color: #786954;
+  font: italic 12px Georgia, serif;
+}
+
+/* 6. ДОКУМЕНТ, ПОЛОЖЕННЫЙ НА СТОЛ */
+
+.case7-prologue .prologue-reading-area {
+  position: absolute;
+
+  top: 18%;
+  left: 70%;
+
+  z-index: 8;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+
+  width: 26%;
+  max-width: 360px;
+}
+
+.case7-prologue .prologue-reading-paper {
+  width: 100%;
+  aspect-ratio: 210 / 297;
+  min-height: 0;
+
+  padding: clamp(18px, 2vw, 31px);
+
+  transform: rotate(1.5deg);
+
+  box-shadow:
+    2px 3px 0 #9a8665,
+    11px 17px 29px #0008;
+}
+
+.case7-prologue .prologue-reading-paper
+.prologue-paper-title {
+  font-size: clamp(19px, 1.7vw, 26px);
+}
+
+.case7-prologue .prologue-reading-paper
+.prologue-paper-body {
+  font-size: clamp(13px, 1.1vw, 16px);
+}
+
+/* Возврат документа */
+
+.case7-prologue .prologue-return {
+  padding: 10px 15px;
+
+  border: 1px solid #9b805f;
+  border-radius: 4px;
+
+  background:
+    #e8dbc0
+    url("/archive-paper-texture.png")
+    center / cover;
+
+  box-shadow: 2px 5px 11px #0005;
+
+  color: #453625;
+  font: 600 13px Arial, sans-serif;
+
+  cursor: pointer;
+}
+
+.case7-prologue .prologue-return:hover {
+  filter: brightness(1.05);
+}
+
+/* 7. POPUP С ВОПРОСОМ */
+
+.case7-prologue .prologue-conclusion {
+  position: absolute;
+
+  top: 77%;
+  left: 15%;
+
+  z-index: 12;
+
+  width: min(540px, 48%);
+  box-sizing: border-box;
+
+  padding: 19px 22px;
+
+  border: 1px solid #9b886c;
+  border-radius: 4px;
+
+  background:
+    #e9ddc3
+    url("/archive-paper-texture.png")
+    center / cover;
+
+  color: #3a3023;
+
+  box-shadow:
+    3px 5px 0 #99856b,
+    10px 15px 27px #0007;
+
+  transform: rotate(-0.5deg);
 }
 
 .case7-prologue .prologue-answers {
   display: grid;
-  gap: 13px;
-  padding: 18px;
-  border: 1px solid #7e796c;
-  font: 14px/1.5 Arial, sans-serif;
+  gap: 12px;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+
+  font: 13px/1.5 Arial, sans-serif;
 }
 
 .case7-prologue .prologue-answers legend {
-  padding-inline: 8px;
+  margin-bottom: 11px;
+  padding: 0;
+
+  color: #3c2d20;
+  font-weight: 700;
 }
 
 .case7-prologue .prologue-answers label {
   display: flex;
-  align-items: baseline;
-  gap: 9px;
+  align-items: flex-start;
+  gap: 10px;
+
   cursor: pointer;
+}
+
+.case7-prologue .prologue-answers input {
+  flex-shrink: 0;
+  margin-top: 3px;
+
+  accent-color: #8c6746;
+}
+
+.case7-prologue .prologue-feedback {
+  min-height: 18px;
+
+  margin: 13px 0;
+
+  color: #8c3e31;
+  font: 13px/1.4 Arial, sans-serif;
 }
 
 .case7-prologue .prologue-confirm {
-  width: auto !important;
-  align-self: flex-start;
-  padding: 12px 22px;
-  border: 1px solid #ddc39a;
-  background: #c7a772;
-  color: #282118;
-  font: bold 14px Arial, sans-serif;
+  padding: 11px 17px;
+
+  border: 1px solid #876d4d;
+  border-radius: 3px;
+
+  background: #bba17a;
+  color: #2f241a;
+
+  font: 700 13px Arial, sans-serif;
   cursor: pointer;
 }
 
-.case7-prologue #prologueFeedback {
-  min-height: 17px;
-  color: #e7c59d;
-  font: 13px Arial, sans-serif;
+.case7-prologue .prologue-confirm:hover {
+  background: #d0b58a;
 }
 
-/* 4. Кнопка сообщений (справа сверху) */
+/* 8. КНОПКА СООБЩЕНИЙ */
 
 .case7-prologue .prologue-chat-toggle {
   position: absolute;
-  top: 18px;
+  top: 15px;
   right: 22px;
+
   z-index: 102;
-  display: inline-flex;
+
+  display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
+  gap: 9px;
+
+  min-height: 43px;
   padding: 9px 14px;
+
   border: 1px solid #60745f;
-  border-radius: 12px;
+  border-radius: 10px;
+
   background: #354337;
-  box-shadow: 0 5px 18px #0005;
   color: #f1f3eb;
+
   font: 600 13px Arial, sans-serif;
   cursor: pointer;
+
+  box-shadow: 0 6px 17px #0006;
 }
 
-.case7-prologue .prologue-chat-toggle:hover,
-.case7-prologue .prologue-chat-toggle:focus-visible {
+.case7-prologue .prologue-chat-toggle:hover {
   background: #455846;
 }
 
-.case7-prologue .prologue-chat-toggle-icon {
-  font-size: 19px;
-  line-height: 1;
-}
-
 .case7-prologue .prologue-chat-unread:not([hidden]) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+
   min-width: 20px;
   height: 20px;
+
   padding: 0 5px;
-  border-radius: 10px;
+
+  border-radius: 12px;
   background: #ba8158;
-  color: #201c18;
+  color: #281e17;
+
   font: 700 11px Arial, sans-serif;
 }
 
-/* 5. Popup сообщений: поверх стола, без изменения сетки */
+/* 9. POPUP ЧАТА */
 
 .id-table-workspace .case7-prologue .prologue-chat {
   position: absolute;
-  top: 74px;
+
+  top: 69px;
   right: 22px;
+
   z-index: 101;
+
   display: flex;
   flex-direction: column;
-  width: min(370px, calc(100vw - 36px));
-  height: min(540px, calc(100dvh - 170px));
-  min-height: 260px;
-  padding: 0;
+
+  width: min(370px, calc(100vw - 32px));
+  height: min(500px, calc(100dvh - 155px));
+  min-height: 0;
+
   overflow: hidden;
+
   border: 1px solid #596d57;
-  border-radius: 15px;
+  border-radius: 13px;
+
   background: #303b32;
-  box-shadow: 0 18px 48px #0009;
   color: #f1f3eb;
-  font-family: var(--f-body, "Golos Text", Arial, sans-serif);
+
+  box-shadow: 0 18px 40px #0009;
+
   opacity: 0;
   visibility: hidden;
+
   transform: translateY(-8px);
   pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    visibility 160ms;
 }
 
-.id-table-workspace .case7-prologue.chat-popup-open .prologue-chat {
+.id-table-workspace
+.case7-prologue.chat-popup-open
+.prologue-chat {
   opacity: 1;
   visibility: visible;
+
   transform: translateY(0);
   pointer-events: auto;
 }
@@ -269,9 +711,13 @@
   display: flex;
   align-items: center;
   gap: 11px;
+
   flex-shrink: 0;
-  min-height: 68px;
-  padding: 12px 16px;
+  min-height: 65px;
+
+  box-sizing: border-box;
+  padding: 12px 15px;
+
   border-bottom: 1px solid #596d57;
   background: #354337;
 }
@@ -279,26 +725,27 @@
 .case7-prologue .prologue-contact-avatar {
   display: grid;
   place-items: center;
+
+  width: 37px;
+  height: 37px;
+
   flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+
+  border-radius: 11px;
   background: #577666;
-  color: #fff;
-  font: 23px Arial, sans-serif;
 }
 
 .case7-prologue .prologue-contact-info {
   display: flex;
   flex-direction: column;
   gap: 5px;
+
   min-width: 0;
 }
 
 .case7-prologue .prologue-contact-info strong {
   color: #fff;
   font-size: 14px;
-  font-weight: 600;
 }
 
 .case7-prologue .prologue-contact-info small {
@@ -308,35 +755,34 @@
 
 .case7-prologue .prologue-online-dot {
   display: inline-block;
+
   width: 6px;
   height: 6px;
+
   margin-right: 6px;
+
   border-radius: 50%;
   background: #4dc795;
-  vertical-align: 1px;
 }
 
 .case7-prologue .prologue-chat-close {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
+
   margin-left: auto;
+
   border: 0;
-  border-radius: 8px;
-  background: #ffffff14;
-  color: #f1f3eb;
-  font: 24px/1 Arial, sans-serif;
+  border-radius: 7px;
+
+  background: #ffffff15;
+  color: #fff;
+
+  font: 23px/1 Arial, sans-serif;
   cursor: pointer;
 }
 
-.case7-prologue .prologue-chat-close:hover {
-  background: #ffffff2a;
-}
-
-
-/* История сообщений.
-   Внешний вид пузырьков задаётся общими стилями
-   в integratedDesktop.css. */
+/* Общие пузырьки сообщений .bub
+   оформляются в integratedDesktop.css */
 
 .case7-prologue .prologue-messages {
   margin: 12px;
@@ -344,97 +790,96 @@
 
 .case7-prologue .prologue-chat footer {
   flex-shrink: 0;
+
   padding: 12px 16px;
+
   border-top: 1px solid #596d57;
+
   background: #354337;
   color: #c8d5c4;
-  font-size: 11px;
+
+  font: 11px Arial, sans-serif;
 }
 
+/* 10. ПОСЛЕ ПРОЛОГА */
 
-/* 7. После пролога: только кнопка и popup, без перекрытия стола */
-
-.id-table-workspace .case7-prologue.prologue-drawer-only {
-  position: absolute;
+.id-table-workspace .case7-prologue.prologue-chat-only {
   inset: 68px 20px auto auto;
-  display: block;
+
   width: 0;
   height: 0;
   min-height: 0;
-  overflow: visible;
+
   background: transparent;
+  overflow: visible;
+
   pointer-events: none;
 }
 
-.case7-prologue.prologue-drawer-only .prologue-stage {
-  display: none !important;
-}
-
-.case7-prologue.prologue-drawer-only .prologue-chat-toggle {
+.case7-prologue.prologue-chat-only .prologue-chat-toggle {
   top: 0;
   right: 0;
   pointer-events: auto;
 }
 
-.id-table-workspace .case7-prologue.prologue-drawer-only .prologue-chat {
-  top: 54px;
+.id-table-workspace
+.case7-prologue.prologue-chat-only
+.prologue-chat {
+  top: 53px;
   right: 0;
 }
 
-/* 8. Адаптивность */
+/* 11. УЗКИЕ ЭКРАНЫ */
 
-@media (max-width: 800px) {
-  .case7-prologue .prologue-docs {
-    grid-template-columns: 1fr;
+@media (max-width: 950px) {
+  .case7-prologue .prologue-desk-scene {
+    min-width: 1050px;
+    min-height: 720px;
   }
 
-  .case7-prologue .prologue-stage {
-    padding: 90px 18px 28px;
+  .case7-prologue .prologue-folder-closed {
+    width: 300px;
   }
 
-  .case7-prologue .prologue-chat-toggle {
-    right: 12px;
+  .case7-prologue .prologue-open-folder {
+    width: 590px;
   }
 
-  .id-table-workspace .case7-prologue .prologue-chat {
-    right: 12px;
-    width: min(370px, calc(100vw - 24px));
-    height: min(500px, calc(100dvh - 180px));
-    min-height: 0;
+  .case7-prologue .prologue-reading-area {
+    width: 280px;
   }
 
-  .id-table-workspace .case7-prologue.prologue-drawer-only {
-    right: 12px;
+  .case7-prologue .prologue-tip {
+    width: 245px;
   }
 
-  .id-table-workspace .case7-prologue.prologue-drawer-only .prologue-chat {
-    right: 0;
+  .case7-prologue .prologue-conclusion {
+    width: 500px;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* 12. УМЕНЬШЕНИЕ АНИМАЦИЙ */
 
-  .case7-prologue .prologue-folder,
+@media (prefers-reduced-motion: reduce) {
+  .case7-prologue .prologue-folder-closed,
+  .case7-prologue .prologue-document,
   .id-table-workspace .case7-prologue .prologue-chat {
     transition: none;
   }
 }
 
+/* 13. СКРЫТИЕ ОБЫЧНЫХ НАХОДОК НА ВРЕМЯ ПРОЛОГА */
 
-
-/* Текстуры бумаги*/
-
-.case7-prologue .prologue-folder {
-  box-shadow:
-    3px 5px 0 #6b4d30,
-    9px 13px 24px rgba(0, 0, 0, 0.4),
-    20px 25px 45px rgba(0, 0, 0, 0.22);
-}
-
-.case7-prologue .prologue-doc {
-  border: 1px solid rgba(103, 79, 49, 0.22);
-
-  box-shadow:
-    1px 2px 0 rgba(95, 75, 52, 0.5),
-    5px 9px 19px rgba(0, 0, 0, 0.35);
+#app.integrated-desktop
+.id-table-workspace:has(
+  .case7-prologue:not(.prologue-chat-only)
+)
+#spaceTable :is(
+  .desk-surface,
+  .desk-inspect,
+  .desk-preview,
+  .desk-items-panel,
+  .desk-inspect-panel
+) {
+  visibility: hidden;
 }

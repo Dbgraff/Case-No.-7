@@ -1,0 +1,128 @@
+/* Shared camera: the desk image and desk objects move; UI remains fixed. */
+#spaceTable,
+.id-table-workspace {
+  --desk-camera-scale: 1;
+  --desk-camera-x: 0px;
+  --desk-camera-y: 0px;
+  --desk-camera-time: 550ms;
+  --desk-camera-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+#app.integrated-desktop #spaceTable::before {
+  transform-origin: center center;
+  transform: translate(var(--desk-camera-x), var(--desk-camera-y))
+    scale(var(--desk-camera-scale));
+  transition: transform var(--desk-camera-time) var(--desk-camera-ease);
+}
+
+#app.integrated-desktop #spaceTable .desk-surface,
+#app.integrated-desktop .case7-prologue .prologue-desk-scene {
+  transform: translate(var(--desk-camera-x), var(--desk-camera-y))
+    scale(var(--desk-camera-scale));
+  transition: transform var(--desk-camera-time) var(--desk-camera-ease);
+}
+
+#app.integrated-desktop .id-table-workspace.desk-camera-focused
+.case7-prologue .prologue-tip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The physical inspection clipboard is an overlay, not a layout column. */
+#app.integrated-desktop #spaceTable .desk-camera-board {
+  position: absolute;
+  top: 12%;
+  right: 2.6%;
+  z-index: 170;
+  display: flex;
+  flex-direction: column;
+  width: clamp(280px, 29%, 420px);
+  height: 76%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #a18a69;
+  border-radius: 6px;
+  background: #d3c09e url("/archive-paper-texture.png") center / cover;
+  color: #382b1e;
+  box-shadow: -9px 12px 30px #0007;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(calc(100% + 75px));
+  transition:
+    transform 550ms cubic-bezier(.22, 1, .36, 1),
+    opacity 350ms ease,
+    visibility 550ms;
+}
+
+#app.integrated-desktop #spaceTable.desk-camera-focused .desk-camera-board {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board-header {
+  flex-shrink: 0;
+  padding: 12px 17px;
+  border-bottom: 1px solid #a18a69;
+  background: #c5ad87;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-back {
+  border: 1px solid #8f7656;
+  border-radius: 4px;
+  background: #e8d7b9;
+  color: #3d2e1f;
+  padding: 9px 12px;
+  font: 600 13px Arial, sans-serif;
+  cursor: pointer;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board-title {
+  margin: 0 0 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #9a8263;
+  font: normal 27px/1.2 "Oranienbaum", Georgia, serif;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board-content {
+  min-height: 0;
+  font: 14px/1.55 "Golos Text", Arial, sans-serif;
+}
+
+/* Keep the existing, live #deskInspect node and its controls. */
+#app.integrated-desktop #spaceTable .desk-camera-board #deskInspect {
+  position: static !important;
+  inset: auto !important;
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0;
+  padding: 0 !important;
+  margin: 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board #deskInspect::before {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app.integrated-desktop #spaceTable::before,
+  #app.integrated-desktop #spaceTable .desk-surface,
+  #app.integrated-desktop .case7-prologue .prologue-desk-scene,
+  #app.integrated-desktop #spaceTable .desk-camera-board {
+    transition-duration: 0ms;
+  }
+}

@@ -13,6 +13,7 @@ import { bindArchive } from "./ui/computer/archive";
 import { completeTutorialStep, startTutorial } from "./game/tutorial";
 import { FIND_TEMPLATES } from "./data/finds";
 import { initPrologue } from "./ui/table/prologue";
+import { initDeskCamera } from "./ui/table/deskCamera";
 import { isTutorialRunning } from "./game/tutorial/steps";
 import { bindTutorial } from "./ui/computer/tutorial";
 import { bindCaseBoard } from "./ui/computer/caseBoard";
@@ -118,6 +119,7 @@ bindCaseBoard();
 // The first trip has already happened; the player examines its folder in HQ.
 startTutorial();
 initIntegratedDesktop();
+initDeskCamera();
 initPrologue();
 initStory(bindTutorial);
 

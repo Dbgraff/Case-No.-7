@@ -1,5 +1,6 @@
 
 import "./restorationDesk.css";
+import { getDeskCamera } from "./deskCamera";
 
 import {
   FIND_STATUS_LABELS,
@@ -207,6 +208,18 @@ export function bindFinds(): void {
           selectedId = f.id;
           completeTutorialStep("selectItem", f.id);
           render();
+          const selectedNode = Array.from(
+            surface.querySelectorAll<HTMLElement>(".desk-item")
+          ).find(node => node.classList.contains("sel"));
+          const camera = getDeskCamera();
+          if (selectedNode && camera) {
+            camera.open({
+              target: selectedNode,
+              title: f.title,
+              // Move the live inspection panel into the overlay; keep handlers.
+              content: inspect,
+            });
+          }
         }),
       );
     }

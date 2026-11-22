@@ -8,6 +8,12 @@
   --desk-camera-ease: cubic-bezier(.22, 1, .36, 1);
 }
 
+/* Keep the offscreen clipboard and moving background within the desk width. */
+#app.integrated-desktop .id-table-workspace #spaceTable {
+  width: 100%;
+  overflow-x: clip;
+}
+
 #app.integrated-desktop #spaceTable::before {
   transform-origin: center center;
   transform: translate(var(--desk-camera-x), var(--desk-camera-y))
@@ -29,7 +35,7 @@
 }
 
 /* The physical inspection clipboard is an overlay, not a layout column. */
-#app.integrated-desktop #spaceTable .desk-camera-board {
+#app.integrated-desktop .id-table-workspace .desk-camera-board {
   position: absolute;
   top: 12%;
   right: 2.6%;
@@ -55,21 +61,21 @@
     visibility 550ms;
 }
 
-#app.integrated-desktop #spaceTable.desk-camera-focused .desk-camera-board {
+#app.integrated-desktop .id-table-workspace.desk-camera-focused .desk-camera-board {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateX(0);
 }
 
-#app.integrated-desktop #spaceTable .desk-camera-board-header {
+#app.integrated-desktop .id-table-workspace .desk-camera-board-header {
   flex-shrink: 0;
   padding: 12px 17px;
   border-bottom: 1px solid #a18a69;
   background: #c5ad87;
 }
 
-#app.integrated-desktop #spaceTable .desk-camera-back {
+#app.integrated-desktop .id-table-workspace .desk-camera-back {
   border: 1px solid #8f7656;
   border-radius: 4px;
   background: #e8d7b9;
@@ -79,27 +85,27 @@
   cursor: pointer;
 }
 
-#app.integrated-desktop #spaceTable .desk-camera-board-body {
+#app.integrated-desktop .id-table-workspace .desk-camera-board-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding: 18px;
 }
 
-#app.integrated-desktop #spaceTable .desk-camera-board-title {
+#app.integrated-desktop .id-table-workspace .desk-camera-board-title {
   margin: 0 0 15px;
   padding-bottom: 12px;
   border-bottom: 1px solid #9a8263;
   font: normal 27px/1.2 "Oranienbaum", Georgia, serif;
 }
 
-#app.integrated-desktop #spaceTable .desk-camera-board-content {
+#app.integrated-desktop .id-table-workspace .desk-camera-board-content {
   min-height: 0;
   font: 14px/1.55 "Golos Text", Arial, sans-serif;
 }
 
 /* Keep the existing, live #deskInspect node and its controls. */
-#app.integrated-desktop #spaceTable .desk-camera-board #deskInspect {
+#app.integrated-desktop .id-table-workspace .desk-camera-board #deskInspect {
   position: static !important;
   inset: auto !important;
   display: block;
@@ -114,7 +120,7 @@
   box-shadow: none;
 }
 
-#app.integrated-desktop #spaceTable .desk-camera-board #deskInspect::before {
+#app.integrated-desktop .id-table-workspace .desk-camera-board #deskInspect::before {
   display: none !important;
 }
 
@@ -122,7 +128,19 @@
   #app.integrated-desktop #spaceTable::before,
   #app.integrated-desktop #spaceTable .desk-surface,
   #app.integrated-desktop .case7-prologue .prologue-desk-scene,
-  #app.integrated-desktop #spaceTable .desk-camera-board {
+  #app.integrated-desktop .id-table-workspace .desk-camera-board {
     transition-duration: 0ms;
+  }
+}
+
+#app.integrated-desktop .case7-prologue > .desk-camera-board {
+  z-index: 100;
+  width: min(420px, 42%);
+  max-height: calc(100dvh - 150px);
+}
+
+@media (max-width: 950px) {
+  #app.integrated-desktop .case7-prologue > .desk-camera-board {
+    width: min(420px, 94%);
   }
 }

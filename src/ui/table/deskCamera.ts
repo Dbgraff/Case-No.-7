@@ -7,6 +7,8 @@ type CameraOptions = {
   target: HTMLElement;
   title: string;
   content: HTMLElement;
+  backLabel?: string;
+  prologueHost?: HTMLElement;
   onClose?: () => void;
 };
 
@@ -52,22 +54,16 @@ export function initDeskCamera(): DeskCamera {
   const back = board.querySelector<HTMLButtonElement>(".desk-camera-back")!;
   const title = board.querySelector<HTMLElement>(".desk-camera-board-title")!;
   const body = board.querySelector<HTMLElement>(".desk-camera-board-content")!;
+  const scrollArea = board.querySelector<HTMLElement>(".desk-camera-board-body")!;
 
   // Preserve the original position of #deskInspect and all its event listeners.
   const originalInspectParent = document.getElementById("deskInspect")?.parentNode;
   const originalInspectNext = document.getElementById("deskInspect")?.nextSibling;
 
   let opened = false;
-  let activeTarget: HTMLElement | null = null;
   let activeClose: (() => void) | undefined;
-  let translationX = 0;
-  let translationY = 0;
-  let scale = 1;
 
   function setTransform(x: number, y: number, zoom: number): void {
-    translationX = x;
-    translationY = y;
-    scale = zoom;
     for (const root of [desk!, workspace!]) {
       root.style.setProperty("--desk-camera-x", x + "px");
       root.style.setProperty("--desk-camera-y", y + "px");
@@ -75,51 +71,53 @@ export function initDeskCamera(): DeskCamera {
     }
   }
 
-  function setTransformOrigin(element: HTMLElement, deskRect: DOMRect): void {
-    // Origin is the center of the desk, expressed in the element's
-    // untransformed coordinate system.
-    const rect = element.getBoundingClientRect();
-    const centerX = deskRect.left + deskRect.width / 2;
-    const centerY = deskRect.top + deskRect.height / 2;
-    const baseLeft = centerX + (rect.left - centerX - translationX) / scale;
-    const baseTop = centerY + (rect.top - centerY - translationY) / scale;
-    element.style.transformOrigin =
-      (centerX - baseLeft) + "px " + (centerY - baseTop) + "px";
-  }
-
   function open(options: CameraOptions): void {
     const deskRect = desk!.getBoundingClientRect();
-    const targetRect = options.target.getBoundingClientRect();
     const centerX = deskRect.left + deskRect.width / 2;
     const centerY = deskRect.top + deskRect.height / 2;
+    const scene = options.prologueHost?.querySelector<HTMLElement>(".prologue-desk-scene") ?? surface;
+    const transform = scene ? getComputedStyle(scene).transform : "none";
+    const matrix = transform === "none" ? new DOMMatrix() : new DOMMatrix(transform);
 
-    // Undo the current camera transform if the player selects another item.
+    // Use the position on screen, including any camera motion still in progress.
+    const targetRect = options.target.getBoundingClientRect();
     const sourceX = centerX +
-      ((targetRect.left + targetRect.width / 2) - centerX - translationX) / scale;
+      ((targetRect.left + targetRect.width / 2) - centerX - matrix.e) / matrix.a;
     const sourceY = centerY +
-      ((targetRect.top + targetRect.height / 2) - centerY - translationY) / scale;
+      ((targetRect.top + targetRect.height / 2) - centerY - matrix.f) / matrix.d;
+
+    if (scene) {
+      const sceneRect = scene.getBoundingClientRect();
+      scene.style.transformOrigin =
+        ((centerX - sceneRect.left + matrix.e) / matrix.a) + "px " +
+        ((centerY - sceneRect.top + matrix.f) / matrix.d) + "px";
+    }
 
     const desiredX = deskRect.left + deskRect.width * 0.37;
     const desiredY = deskRect.top + deskRect.height * 0.49;
     const x = desiredX - centerX - (sourceX - centerX) * DESK_CAMERA_ZOOM;
     const y = desiredY - centerY - (sourceY - centerY) * DESK_CAMERA_ZOOM;
 
-    if (surface) setTransformOrigin(surface, deskRect);
-    const prologueScene = workspace!.querySelector<HTMLElement>(".prologue-desk-scene");
-    if (prologueScene) setTransformOrigin(prologueScene, deskRect);
-
     // A different selection should not detach the existing inspection
     // content until the next panel is ready.
-    activeTarget = options.target;
     activeClose = options.onClose;
 
     title.textContent = options.title;
+    back.textContent = options.backLabel ?? "← Назад к столу";
+    const parent = options.prologueHost ?? desk!;
+    if (board.parentElement !== parent) {
+      parent.appendChild(board);
+      // Compute the offscreen position before switching to the open state.
+      board.getBoundingClientRect();
+    }
     body.replaceChildren(options.content);
     board.inert = false;
     opened = true;
     desk!.classList.add("desk-camera-focused");
     workspace!.classList.add("desk-camera-focused");
     setTransform(x, y, DESK_CAMERA_ZOOM);
+    scrollArea.scrollTop = 0;
+    if (options.prologueHost) back.focus({ preventScroll: true });
   }
 
   function close(): void {
@@ -141,7 +139,6 @@ export function initDeskCamera(): DeskCamera {
       }
     }
 
-    activeTarget = null;
     const cb = activeClose;
     activeClose = undefined;
     cb?.();

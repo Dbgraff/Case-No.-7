@@ -1,3 +1,29 @@
+#app.integrated-desktop .case7-prologue {
+  --prologue-clipboard-width: min(470px, 46%);
+  --prologue-clipboard-right: 2.6%;
+}
+
+.case7-prologue::before {
+  position: absolute;
+  z-index: 98;
+  inset: 0;
+  content: "";
+  background: #130b07b3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+.case7-prologue:has(> .prologue-reading-paper)::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case7-prologue::before {
+    transition: none;
+  }
+}
+
 #app.integrated-desktop .id-table-workspace:has(.case7-prologue:not(.prologue-chat-only)) #spaceTable::before,
 #app.integrated-desktop .case7-prologue .prologue-desk-scene {
   transform: none;
@@ -28,8 +54,10 @@
   position: absolute;
   z-index: 99;
   top: 9%;
-  left: 10%;
-  width: min(40%, 420px);
+  left: 0;
+  right: calc(var(--prologue-clipboard-width) + var(--prologue-clipboard-right));
+  width: min(420px, calc(100% - var(--prologue-clipboard-width) - var(--prologue-clipboard-right) - 40px));
+  margin-inline: auto;
   aspect-ratio: 210 / 297;
   max-height: calc(100dvh - 130px);
   box-sizing: border-box;
@@ -49,70 +77,149 @@
 }
 
 #app.integrated-desktop .case7-prologue > .desk-camera-board:has(.prologue-clipboard-notes) {
-  border: 7px solid #66422a;
-  border-radius: 12px;
-  background: #e9d9b8 url("/archive-paper-texture.png") center / cover;
-  box-shadow: inset 0 0 0 1px #aa8354, -8px 12px 24px #0009;
+  --clipboard-edge: clamp(10px, 1.2vw, 16px);
+  --clipboard-clip-width: min(48%, 162px);
+
+  top: 8%;
+  right: var(--prologue-clipboard-right);
+  width: var(--prologue-clipboard-width);
+  height: 82%;
+  max-height: calc(100dvh - 124px);
+  padding: 56px var(--clipboard-edge) var(--clipboard-edge);
+  border: 1px solid #422b1d;
+  border-radius: 10px 10px 8px 8px;
+  background:
+    linear-gradient(130deg, #ab7a48b3, #583723df 57%, #332017e8),
+    #755132 url("/case-folder-texture.png") center / cover;
+  box-shadow:
+    inset 1px 1px 2px #e3ac7070,
+    inset -2px -3px 4px #26170bb3,
+    3px 7px 0 #2e1d13,
+    8px 15px 26px #0009;
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes) .desk-camera-board-header {
-  position: relative;
-  padding-top: 34px;
-}
-
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes) .desk-camera-board-header::before {
+.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::before,
+.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::after {
   position: absolute;
   content: "";
-  top: 0;
+  pointer-events: none;
+}
+
+.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::before {
+  inset: 34px var(--clipboard-edge) var(--clipboard-edge);
+  background:
+    linear-gradient(115deg, #fff7dc44, #fff9e97a 44%, #c0935833),
+    #e9d9b8 url("/archive-paper-texture.png") center / cover;
+  border: 1px solid #c6ad82;
+  border-radius: 1px;
+  box-shadow:
+    0 1px 0 #ddc59e,
+    0 3px 0 #ae926a,
+    2px 5px 7px #301d1366;
+}
+
+.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::after {
+  z-index: 2;
+  top: 4px;
   left: 50%;
-  width: 40%;
-  height: 23px;
+  width: var(--clipboard-clip-width);
+  aspect-ratio: 3 / 1;
   transform: translateX(-50%);
-  border: 1px solid #504c42;
-  border-radius: 3px 3px 7px 7px;
-  background: linear-gradient(#8d8b80, #dedad0 42%, #a7a397 55%, #6b685f);
-  box-shadow: 0 3px 4px #0006;
+  background: url("/prologue-clipboard-clip.webp") center / contain no-repeat;
+  filter: drop-shadow(1px 3px 2px #26160bd9);
+}
+
+#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+:is(.desk-camera-board-header, .desk-camera-board-body) {
+  position: relative;
+  z-index: 1;
+  padding-inline: clamp(12px, 1.5vw, 22px);
+}
+
+#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+.desk-camera-board-header {
+  display: flex;
+  justify-content: flex-end;
+  padding-block: 4px;
+  border: 0;
+  background: transparent;
+}
+
+#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+.desk-camera-board-body {
+  padding-block: 7px 13px;
+}
+
+#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+.desk-camera-board-title {
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #906b4877;
+  font: 600 clamp(17px, 1.85vw, 25px) / 1.18 Georgia, serif;
 }
 
 .prologue-clipboard-notes dl {
-  margin: 0 0 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px 10px;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #906b4877;
+  line-height: 1.35;
 }
 
 .prologue-clipboard-notes dt {
-  font-weight: 700;
+  color: #614830;
 }
 
 .prologue-clipboard-notes dd {
-  margin: 0 0 8px;
+  margin: 0;
+  font-family: Georgia, serif;
+}
+
+.prologue-clipboard-notes strong {
+  padding: 0 4px;
+  background: #cba85a4d;
 }
 
 .prologue-clipboard-actions {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
+#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+.desk-camera-back,
 .prologue-clipboard-actions button {
-  padding: 8px 10px;
-  border: 1px solid #8f7656;
-  border-radius: 4px;
-  background: #e8d7b9;
-  color: #3d2e1f;
-  font: inherit;
+  padding: 6px 9px;
+  border: 1px solid #8863448c;
+  border-radius: 2px;
+  background: #ba8b4717;
+  color: #4a3525;
+  font: 600 13px / 1.3 Georgia, serif;
   cursor: pointer;
+}
+
+#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+.desk-camera-back:hover,
+.prologue-clipboard-actions button:hover {
+  background: #ba8b4738;
 }
 
 @media (max-width: 700px) {
   .case7-prologue > .prologue-reading-paper {
     top: 66px;
-    left: max(4%, calc((100% - 320px) / 2));
+    right: 0;
     width: min(92%, 320px);
-    max-height: max(155px, calc(54dvh - 112px));
+    max-height: max(155px, calc(54dvh - 132px));
   }
 
   #app.integrated-desktop .case7-prologue > .desk-camera-board:has(.prologue-clipboard-notes) {
+    --clipboard-clip-width: min(44%, 132px);
+
     top: max(230px, calc(54dvh - 54px));
-    right: max(3%, calc((100% - 360px) / 2));
-    width: min(94%, 360px);
-    height: 43dvh;
+    right: max(3%, calc((100% - 380px) / 2));
+    width: min(94%, 380px);
+    height: 46dvh;
+    padding-top: 46px;
   }
 }

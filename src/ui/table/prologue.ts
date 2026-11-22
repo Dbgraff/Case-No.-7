@@ -5,6 +5,8 @@ import { getState, subscribe } from "../../core/state";
 import { completeTutorialStep } from "../../game/tutorial";
 import { showSpace } from "../spaces";
 import { say, type ChatKind } from "../computer/chat";
+import { getDeskCamera } from "./deskCamera";
+import { createPrologueClipboard, showProloguePaper } from "./prologueInspection";
 
 type ChatMessage = {
   who: string;
@@ -33,15 +35,19 @@ const DOCUMENTS: Record<
     label: string;
     title: string;
     content: string;
+    subjectLine: string;
+    season: string;
+    birthYear: number;
     footer: string;
   }
 > = {
   diary: {
     label: "ЛЕТО 1975 · ДНЕВНИК «ИСКРЫ»",
     title: "Запись поискового отряда",
+    subjectLine: "Разыскиваемый: Иван Федотов.",
+    season: "Лето 1975",
+    birthYear: 1920,
     content: `
-      <p>Разыскиваемый: Иван Федотов.</p>
-      <p>Год рождения: <mark>1920</mark>.</p>
       <p>Дальнейшую судьбу необходимо установить.</p>
     `,
     footer: "Дело № 7 · лист 1",
@@ -50,9 +56,10 @@ const DOCUMENTS: Record<
   request: {
     label: "ОСЕНЬ 1975 · ЧЕРНОВИК ЗАПРОСА",
     title: "Обращение в архив",
+    subjectLine: "Просим сообщить о судьбе Федотова Ивана.",
+    season: "Осень 1975",
+    birthYear: 1921,
     content: `
-      <p>Просим сообщить о судьбе Федотова Ивана.</p>
-      <p>Год рождения: <mark>1921</mark>.</p>
       <p>Дополнительные сведения уточняются.</p>
     `,
     footer: "Дело № 7 · лист 2",
@@ -74,6 +81,8 @@ function documentContent(id: DocumentId): string {
     </strong>
 
     <div class="prologue-paper-body">
+      <p>${documentData.subjectLine}</p>
+      <p>Год рождения: <mark>${documentData.birthYear}</mark>.</p>
       ${documentData.content}
     </div>
 
@@ -452,29 +461,6 @@ export function initPrologue(): void {
           </div>
         </div>
 
-        <!--
-          Лист, который игрок достал из папки.
-          Он лежит отдельно справа на столе.
-        -->
-        <div
-          class="prologue-reading-area"
-          id="prologueReadingArea"
-          hidden
-        >
-          <article
-            class="prologue-reading-paper"
-            id="prologueReadingPaper"
-          ></article>
-
-          <button
-            type="button"
-            class="prologue-return"
-            id="prologueReturnDoc"
-          >
-            ← Вернуть документ в папку
-          </button>
-        </div>
-
         <aside
           class="prologue-tip prologue-tip--action"
           id="prologueActionTip"
@@ -485,8 +471,7 @@ export function initPrologue(): void {
           </span>
 
           <p id="prologueActionText">
-            Нажмите на лист в папке,
-            чтобы положить его на стол.
+            Нажмите на лист в папке, чтобы рассмотреть его.
           </p>
         </aside>
 
@@ -562,14 +547,6 @@ export function initPrologue(): void {
       </div>
     `;
 
-    const readingArea = stage.querySelector<HTMLElement>(
-      "#prologueReadingArea",
-    )!;
-
-    const readingPaper = stage.querySelector<HTMLElement>(
-      "#prologueReadingPaper",
-    )!;
-
     const actionTip = stage.querySelector<HTMLElement>(
       "#prologueActionTip",
     )!;
@@ -582,83 +559,60 @@ export function initPrologue(): void {
       "#prologueConclusion",
     )!;
 
-    // -------------------------------------------------------
-    // Достаём документ из папки
-    // -------------------------------------------------------
+    const documentButtons = stage.querySelectorAll<HTMLButtonElement>(
+      "[data-document]",
+    );
 
-    function showDocument(id: DocumentId): void {
-      viewedDocuments.add(id);
+    for (const button of documentButtons) {
+      button.setAttribute("aria-pressed", "false");
 
-      readingPaper.innerHTML = documentContent(id);
+      button.addEventListener("click", () => {
+        const camera = getDeskCamera();
+        if (!camera) return;
 
-      readingArea.hidden = false;
+        const id = button.dataset.document as DocumentId;
+        const details = DOCUMENTS[id];
+        const other = Array.from(documentButtons).find(candidate => candidate !== button)!;
+        const paper = showProloguePaper(host, button, details.title, documentContent(id));
 
-      stage
-        .querySelectorAll<HTMLButtonElement>(
-          "[data-document]",
-        )
-        .forEach((button) => {
-          const selected =
-            button.dataset.document === id;
+        viewedDocuments.add(id);
+        conclusion.hidden = true;
 
-          button.classList.toggle(
-            "is-reading",
-            selected,
-          );
-
-          button.setAttribute(
-            "aria-pressed",
-            String(selected),
-          );
-        });
-
-      if (viewedDocuments.size === 2) {
-        actionTip.hidden = true;
-        conclusion.hidden = false;
-      } else {
-        actionText.textContent =
-          "Документ лежит на столе. Прочитайте его, затем верните в папку.";
-      }
-    }
-
-    stage
-      .querySelectorAll<HTMLButtonElement>(
-        "[data-document]",
-      )
-      .forEach((button) => {
-        button.addEventListener("click", () => {
-          showDocument(
-            button.dataset.document as DocumentId,
-          );
-        });
-      });
-
-    // -------------------------------------------------------
-    // Возвращаем документ в папку
-    // -------------------------------------------------------
-
-    stage
-      .querySelector("#prologueReturnDoc")
-      ?.addEventListener("click", () => {
-        readingArea.hidden = true;
-
-        stage
-          .querySelectorAll<HTMLButtonElement>(
-            "[data-document]",
-          )
-          .forEach((button) => {
-            button.classList.remove("is-reading");
-            button.setAttribute(
-              "aria-pressed",
-              "false",
-            );
-          });
-
-        if (viewedDocuments.size < 2) {
-          actionText.textContent =
-            "Теперь выберите второй документ.";
+        for (const documentButton of documentButtons) {
+          const selected = documentButton === button;
+          documentButton.classList.toggle("is-reading", selected);
+          documentButton.setAttribute("aria-pressed", String(selected));
         }
+
+        const content = createPrologueClipboard(
+          details,
+          () => other.click(),
+          viewedDocuments.size === documentButtons.length ? () => {
+            camera.close();
+            conclusion.querySelector<HTMLInputElement>("input")?.focus();
+          } : undefined,
+        );
+
+        camera.open({
+          target: button,
+          title: details.title,
+          content,
+          backLabel: "← Вернуть документ в папку",
+          prologueHost: host,
+          onClose: () => {
+            paper.remove();
+            button.classList.remove("is-reading");
+            button.setAttribute("aria-pressed", "false");
+            button.focus({ preventScroll: true });
+
+            const ready = viewedDocuments.size === 2;
+            actionTip.hidden = ready;
+            conclusion.hidden = !ready;
+            actionText.textContent = "Теперь выберите второй документ.";
+          },
+        });
       });
+    }
 
     // -------------------------------------------------------
     // Проверяем вывод
@@ -709,6 +663,10 @@ export function initPrologue(): void {
     const active =
       step === "caseFolder" ||
       step === "caseCompare";
+
+    if (!active && host.querySelector(".prologue-reading-paper")) {
+      getDeskCamera()?.close();
+    }
 
     host.hidden = false;
     stage.hidden = !active;

@@ -8,8 +8,7 @@
    /case-folder-texture.png
    /archive-paper-texture.png
 
-   Фон restoration-workbench.png уже выводится
-   через restorationDesk.css.
+   Фон пролога: /prologue-workbench.png.
    ========================================================== */
 
 /* 1. СЦЕНА */
@@ -827,6 +826,13 @@
 .prologue-chat {
   top: 53px;
   right: 0;
+}
+
+#app.integrated-desktop
+.id-table-workspace:has(.case7-prologue:not(.prologue-chat-only)) #spaceTable::before {
+  background-image: url("/prologue-workbench.png");
+  background-position: center;
+  background-size: cover;
 }
 
 /* 11. УЗКИЕ ЭКРАНЫ */

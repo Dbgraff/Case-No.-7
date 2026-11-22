@@ -1,4 +1,5 @@
 import "./prologueInspection.css";
+import "./prologueDocuments.css";
 
 type DocumentDetails = {
   title: string;
@@ -18,6 +19,7 @@ export function showProloguePaper(
 
   const paper = document.createElement("article");
   paper.className = "prologue-reading-paper";
+  paper.dataset.document = button.dataset.document ?? "";
   paper.setAttribute("aria-label", title);
   paper.innerHTML = markup;
   host.appendChild(paper);

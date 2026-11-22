@@ -1,0 +1,186 @@
+.case7-prologue .prologue-desk-scene {
+  --prologue-guide-gutter: clamp(16px, 4vw, 56px);
+}
+
+.case7-prologue .prologue-desk-scene .prologue-tip--intro,
+.case7-prologue .prologue-tip--action .prologue-tip-heading {
+  display: none;
+}
+
+.case7-prologue .prologue-desk-scene .prologue-tip--action {
+  inset: 70px 0 auto;
+  margin-inline: auto;
+  width: fit-content;
+  max-width: min(44ch, calc(100% - 2 * var(--prologue-guide-gutter)));
+  padding: 10px clamp(12px, 2vw, 24px);
+  border: 0;
+  border-inline-start: 2px solid #a79c69;
+  border-radius: 0 4px 4px 0;
+  background: #25231cf2;
+  box-shadow: 0 2px 8px #0004;
+  transform: none;
+}
+
+.case7-prologue .prologue-tip--action p {
+  color: #f4e9d3;
+  font: 600 clamp(17px, 1.65vw, 21px) / 1.35 Georgia, serif;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.case7-prologue > .prologue-conclusion {
+  z-index: 99;
+  top: calc((100dvh - 54px) / 2);
+  right: 0;
+  left: 0;
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 86px);
+  margin-inline: auto;
+  padding: clamp(16px, 3vw, 25px);
+  overflow: auto;
+  border: 1px solid #817653;
+  border-inline-start: 3px solid #a79c69;
+  border-radius: 5px;
+  background: #25231c;
+  color: #f4e9d3;
+  box-shadow: 0 12px 36px #0009;
+  transform: translateY(-50%);
+}
+
+.case7-prologue:has(> .prologue-conclusion:not([hidden]))::before {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.case7-prologue .prologue-conclusion > .prologue-tip-heading,
+.case7-prologue .prologue-feedback:empty {
+  display: none;
+}
+
+.case7-prologue .prologue-conclusion .prologue-answers {
+  margin-bottom: 16px;
+  font: 15px / 1.45 Georgia, serif;
+}
+
+.case7-prologue .prologue-conclusion legend {
+  margin-bottom: 16px;
+  color: inherit;
+  font-size: 19px;
+}
+
+.case7-prologue .prologue-conclusion input {
+  accent-color: #b8ac76;
+}
+
+.case7-prologue .prologue-conclusion .prologue-feedback {
+  color: #ffb7a0;
+}
+
+.prologue-conclusion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prologue-conclusion-actions button {
+  padding: 9px 12px;
+  border: 1px solid #a79c69;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: 600 14px / 1.35 Georgia, serif;
+  cursor: pointer;
+}
+
+.prologue-conclusion-actions button:hover {
+  background: #454132;
+}
+
+.prologue-conclusion-actions .prologue-confirm {
+  background: #d8c99d;
+  color: #25231c;
+}
+
+.prologue-conclusion-actions .prologue-confirm:hover {
+  background: #f0dfaf;
+}
+
+#app.integrated-desktop .case7-prologue.prologue-chat-pinned .prologue-chat {
+  top: 16px;
+  right: 16px;
+  width: clamp(220px, 21vw, 320px);
+  height: min(400px, calc(100dvh - 86px));
+  box-sizing: border-box;
+  z-index: 99;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+}
+
+.case7-prologue.prologue-chat-pinned
+:is(.prologue-chat-toggle, .prologue-chat-close, .prologue-chat footer) {
+  display: none;
+}
+
+#app.integrated-desktop .case7-prologue.prologue-chat-pinned
+.prologue-chat:is(:hover, :focus-within) {
+  z-index: 101;
+}
+
+#app.integrated-desktop .case7-prologue.prologue-chat-pinned:has(> .prologue-reading-paper) .prologue-chat {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+}
+
+@media (max-width: 1050px) {
+  #app.integrated-desktop .case7-prologue.prologue-chat-pinned .prologue-chat {
+    --prologue-chat-height: clamp(108px, 20dvh, 160px);
+    top: max(70px, calc(100dvh - 70px - var(--prologue-chat-height)));
+    width: min(300px, calc(100% - 32px));
+    height: var(--prologue-chat-height);
+  }
+
+  .case7-prologue.prologue-chat-pinned .prologue-contact {
+    min-height: 0;
+    padding: 6px 10px;
+  }
+
+  .case7-prologue.prologue-chat-pinned .prologue-contact-avatar {
+    width: 26px;
+    height: 26px;
+  }
+
+  .case7-prologue.prologue-chat-pinned .prologue-contact-info small {
+    display: none;
+  }
+}
+
+.prologue-clipboard-actions .prologue-clipboard-guide {
+  margin: 0 0 2px;
+  padding: 7px 9px;
+  border-inline-start: 2px solid #6c6841;
+  background: #79703e24;
+  color: #3a321f;
+  font: 700 15px / 1.35 Georgia, serif;
+}
+
+.prologue-clipboard-actions button.prologue-clipboard-next {
+  border-color: #514c30;
+  background: #4a4a2f;
+  color: #fff2d7;
+}
+
+.prologue-clipboard-actions button.prologue-clipboard-next:hover {
+  background: #5c5938;
+}
+
+@media (max-width: 700px) {
+  .prologue-clipboard-notes dl {
+    gap: 3px 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+  }
+}

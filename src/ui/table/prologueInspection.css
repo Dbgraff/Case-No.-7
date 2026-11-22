@@ -29,20 +29,29 @@
   transform: none;
 }
 
+.case7-prologue .prologue-desk-scene :is(.prologue-folder-closed, .prologue-open-folder) {
+  inset-inline: 0;
+  margin-inline: auto;
+}
+
 .case7-prologue .prologue-folder-closed {
-  transform: perspective(1100px) rotateX(25deg) rotateZ(-4deg);
+  transform: perspective(1800px) rotateX(19deg) rotateZ(-3deg);
   box-shadow: 2px 3px #8d7c64, 6px 9px 14px #0007;
 }
 
 .case7-prologue .prologue-folder-closed:hover,
 .case7-prologue .prologue-folder-closed:focus-visible {
-  transform: perspective(1100px) rotateX(25deg) rotateZ(-3deg) translateY(-2px);
+  transform: perspective(1800px) rotateX(19deg) rotateZ(-2deg) translateY(-2px);
   box-shadow: 2px 3px #8d7c64, 7px 10px 17px #0008;
 }
 
 .case7-prologue .prologue-open-folder {
-  transform: perspective(1250px) rotateX(24deg) rotateZ(-2deg);
+  transform: rotate(-2deg) perspective(1800px) rotateX(19deg);
   filter: drop-shadow(5px 8px 9px #0007);
+}
+
+.case7-prologue .prologue-open-folder .prologue-folder-left {
+  transform: none;
 }
 
 .case7-prologue .prologue-document.is-reading {

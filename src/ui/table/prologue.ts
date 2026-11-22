@@ -1,4 +1,3 @@
-
 import "./prologue.css";
 
 import { getState, subscribe } from "../../core/state";
@@ -206,7 +205,9 @@ export function initPrologue(): void {
   // =========================================================
 
   function setPopupOpen(open: boolean): void {
-    host.classList.toggle("chat-popup-open", open);
+    const pinned = host.classList.contains("prologue-chat-pinned");
+    open = pinned || open;
+    host.classList.toggle("chat-popup-open", open && !pinned);
 
     toggle.setAttribute(
       "aria-expanded",
@@ -272,7 +273,7 @@ export function initPrologue(): void {
   });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
+    if (document.hidden && host.classList.contains("chat-popup-open")) {
       setPopupOpen(false);
     }
   });
@@ -302,7 +303,7 @@ export function initPrologue(): void {
       messages.appendChild(bubble);
       messages.scrollTop = messages.scrollHeight;
 
-      if (!host.classList.contains("chat-popup-open")) {
+      if (popup.inert) {
         unreadCount++;
 
         unread.textContent = String(unreadCount);
@@ -535,13 +536,14 @@ export function initPrologue(): void {
             role="status"
           ></p>
 
-          <button
-            type="button"
-            class="prologue-confirm"
-            id="prologueConfirm"
-          >
-            Зафиксировать вывод →
-          </button>
+          <div class="prologue-conclusion-actions">
+            <button type="button" id="prologueReviewDocuments">
+              Вернуться к документам
+            </button>
+            <button type="button" class="prologue-confirm" id="prologueConfirm">
+              Зафиксировать вывод →
+            </button>
+          </div>
         </section>
 
       </div>
@@ -558,6 +560,24 @@ export function initPrologue(): void {
     const conclusion = stage.querySelector<HTMLElement>(
       "#prologueConclusion",
     )!;
+
+    const scene = stage.querySelector<HTMLElement>(".prologue-desk-scene")!;
+    host.appendChild(conclusion);
+
+    function showConclusion(visible: boolean): void {
+      conclusion.hidden = !visible;
+      scene.inert = visible;
+      if (visible) {
+        conclusion.querySelector<HTMLInputElement>("input")?.focus();
+      }
+    }
+
+    conclusion.querySelector("#prologueReviewDocuments")?.addEventListener("click", () => {
+      showConclusion(false);
+      actionTip.hidden = false;
+      actionText.textContent = "Перечитайте листы или сопоставьте сведения на планшетке.";
+      stage.querySelector<HTMLButtonElement>("[data-document]")?.focus();
+    });
 
     const documentButtons = stage.querySelectorAll<HTMLButtonElement>(
       "[data-document]",
@@ -576,7 +596,7 @@ export function initPrologue(): void {
         const paper = showProloguePaper(host, button, details.title, documentContent(id));
 
         viewedDocuments.add(id);
-        conclusion.hidden = true;
+        showConclusion(false);
 
         for (const documentButton of documentButtons) {
           const selected = documentButton === button;
@@ -587,10 +607,7 @@ export function initPrologue(): void {
         const content = createPrologueClipboard(
           details,
           () => other.click(),
-          viewedDocuments.size === documentButtons.length ? () => {
-            camera.close();
-            conclusion.querySelector<HTMLInputElement>("input")?.focus();
-          } : undefined,
+          viewedDocuments.size === documentButtons.length ? () => camera.close() : undefined,
         );
 
         camera.open({
@@ -603,12 +620,11 @@ export function initPrologue(): void {
             paper.remove();
             button.classList.remove("is-reading");
             button.setAttribute("aria-pressed", "false");
-            button.focus({ preventScroll: true });
-
-            const ready = viewedDocuments.size === 2;
+            const ready = viewedDocuments.size === documentButtons.length;
             actionTip.hidden = ready;
-            conclusion.hidden = !ready;
+            showConclusion(ready);
             actionText.textContent = "Теперь выберите второй документ.";
+            if (!ready) button.focus({ preventScroll: true });
           },
         });
       });
@@ -618,16 +634,16 @@ export function initPrologue(): void {
     // Проверяем вывод
     // -------------------------------------------------------
 
-    stage
+    conclusion
       .querySelector("#prologueConfirm")
       ?.addEventListener("click", () => {
         const answer =
-          stage.querySelector<HTMLInputElement>(
+          conclusion.querySelector<HTMLInputElement>(
             'input[name="prologueAnswer"]:checked',
           );
 
         const feedback =
-          stage.querySelector<HTMLElement>(
+          conclusion.querySelector<HTMLElement>(
             "#prologueFeedback",
           )!;
 
@@ -671,6 +687,11 @@ export function initPrologue(): void {
     host.hidden = false;
     stage.hidden = !active;
 
+    if (host.classList.contains("prologue-chat-pinned") !== active) {
+      host.classList.toggle("prologue-chat-pinned", active);
+      setPopupOpen(true);
+    }
+
     host.classList.toggle(
       "prologue-chat-only",
       !active,
@@ -681,6 +702,7 @@ export function initPrologue(): void {
     }
 
     previousStep = step;
+    host.querySelector(":scope > .prologue-conclusion")?.remove();
 
     if (step === "caseFolder") {
       renderClosedFolder();

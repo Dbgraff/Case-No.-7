@@ -3,6 +3,12 @@ import type { Clue, Task } from "../game/clues";
 import { isTutorialStep, type TutorialStep } from "../game/tutorial/steps";
 import type { BoardCard, BoardSlotId } from "../game/board";
 
+export type RadioMessage = {
+  who: string;
+  text: string;
+  kind: "" | "sys" | "story";
+};
+
 /** Persistent game state. Extend this type as new systems are added. */
 export type GameState = {
   /** Current in-game day, starting at 1. */
@@ -21,6 +27,8 @@ export type GameState = {
   tasks: Task[];
   /** Current tutorial step. */
   tutorialStep: TutorialStep;
+  /** Messages already delivered to the radio. */
+  radioHistory: RadioMessage[];
   /** Ids of archive documents the player has opened. */
   readDocs: string[];
   /** Words the player pinned to archive quick-search by clicking in text. */
@@ -54,20 +62,22 @@ const listeners = new Set<Listener>();
  * @returns {GameState} Initial state.
  */
 function createInitialState(): GameState {
-return {
-  day: 1,
-  hoursLeft: HOURS_PER_DAY,
-  visits: [],
-  finds: [],
-  groupPlaceId: START_PLACE_ID,
-  clues: [],
-  tasks: [],
-  tutorialStep: "intro",
-  readDocs: [],
-  pinnedWords: [],
-  boardCards: [],
-  boardSlots: { who: null, when: null, where: null, conclusion: null },
-};}
+  return {
+    day: 1,
+    hoursLeft: HOURS_PER_DAY,
+    visits: [],
+    finds: [],
+    groupPlaceId: START_PLACE_ID,
+    clues: [],
+    tasks: [],
+    tutorialStep: "intro",
+    radioHistory: [],
+    readDocs: [],
+    pinnedWords: [],
+    boardCards: [],
+    boardSlots: { who: null, when: null, where: null, conclusion: null },
+  };
+}
 
 /**
  * Reads the save from localStorage and validates it.
@@ -96,14 +106,19 @@ function loadState(): GameState {
       const clues = Array.isArray(data.clues) ? data.clues : [];
       const tasks = Array.isArray(data.tasks) ? data.tasks : [];
 
-            // old saves have no tutorialStep: if the player already has progress,
-      // the tutorial is skipped, otherwise it starts
+      // Old saves may lack a tutorial step. Use existing progress to select the fallback.
       const hasProgress = data.day! > 1 || finds.length > 0 || visits.length > 0;
       const tutorialStep: TutorialStep = isTutorialStep(data.tutorialStep)
         ? data.tutorialStep
         : hasProgress
           ? "skipped"
           : "intro";
+      const radioHistory = Array.isArray(data.radioHistory)
+        ? data.radioHistory.filter(message =>
+            message && typeof message.who === "string" && typeof message.text === "string" &&
+            (message.kind === "" || message.kind === "sys" || message.kind === "story"),
+          )
+        : [];
       const readDocs =
         Array.isArray(data.readDocs) && data.readDocs.every((x) => typeof x === "string")
           ? data.readDocs
@@ -134,14 +149,15 @@ function loadState(): GameState {
         clues,
         tasks,
         tutorialStep,
+        radioHistory,
         readDocs,
         pinnedWords,
         boardCards,
         boardSlots,
-      };    
+      };
     }
   } catch {
-    // corrupted save or storage unavailable — start over
+    // Corrupted save or storage unavailable.
   }
   return createInitialState();
 }
@@ -156,7 +172,7 @@ function saveState(): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // storage full or disabled — the game still works without saving
+    // Storage full or disabled.
   }
 }
 
@@ -166,6 +182,12 @@ function saveState(): void {
  */
 export function getState(): Readonly<GameState> {
   return state;
+}
+
+/** The radio updates its own views through the chat event. */
+export function recordRadioMessage(message: RadioMessage): void {
+  state = { ...state, radioHistory: [...state.radioHistory, message] };
+  saveState();
 }
 
 /**
@@ -200,7 +222,6 @@ export function markDocRead(id: string): void {
 /**
  * Subscribes to state changes. The listener is called once immediately
  * with the current state.
- * @param {Listener} listener - Function called with the new state.
  * @returns {() => void} Unsubscribe function.
  */
 export function subscribe(listener: Listener): () => void {
@@ -215,6 +236,11 @@ export function subscribe(listener: Listener): () => void {
  */
 export function resetState(): void {
   state = createInitialState();
+  try {
+    localStorage.removeItem("case7-monitor-notes");
+  } catch {
+    // Storage may be unavailable.
+  }
   saveState();
   listeners.forEach((l) => l(state));
 }
@@ -227,7 +253,7 @@ export function pinArchiveWord(raw: string): void {
     .replace(/[^а-яa-z0-9]/g, "");
   if (w.length < 3) return;
   if (state.pinnedWords.includes(w)) return;
-  if (state.pinnedWords.length >= MAX_PINNED_WORDS) return; // лимит
+  if (state.pinnedWords.length >= MAX_PINNED_WORDS) return;
   updateState({ pinnedWords: [...state.pinnedWords, w] });
 }
 

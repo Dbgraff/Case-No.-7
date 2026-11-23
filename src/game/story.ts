@@ -1,6 +1,7 @@
 import { FIND_TEMPLATES } from "../data/finds";
 import type { Find } from "./finds";
 import { getState, subscribe, updateState, type GameState } from "../core/state";
+import { hasRadioMessage, type ChatKind } from "../ui/computer/chat";
 import { notify } from "../ui/computer/notifications";
 import { addTableNews } from "../ui/spaces";
 import { isTutorialRunning } from "./tutorial/steps";
@@ -10,15 +11,20 @@ import { isTutorialRunning } from "./tutorial/steps";
  * messenger notifications, not a wall of dialogue in one render frame.
  */
 let nextMessageAt = 0;
+
 export function queueStoryMessage(
   who: string,
   text: string,
-  kind: "" | "sys" | "story" = "story",
+  kind: ChatKind = "story",
   gapMs = 1900,
+  once = false,
 ): void {
+  if (once && hasRadioMessage(who, text, kind)) return;
   const now = performance.now();
   nextMessageAt = Math.max(now, nextMessageAt) + gapMs;
-  window.setTimeout(() => notify(who, text, kind), nextMessageAt - now);
+  window.setTimeout(() => {
+    if (!once || !hasRadioMessage(who, text, kind)) notify(who, text, kind);
+  }, nextMessageAt - now);
 }
 
 /**
@@ -77,16 +83,18 @@ export function initStory(onGameReady: () => void): void {
     if (isTutorialRunning(getState().tutorialStep)) return;
     briefingScheduled = true;
     const s = getState();
+    const briefing = (who: string, text: string, kind: ChatKind = "story", gapMs = 1900) =>
+      queueStoryMessage(who, text, kind, gapMs, true);
     if (s.day !== 1 || s.visits.length > 0 || s.finds.some(f => f.id === "find-damaged-sheet")) {
-      queueStoryMessage("Командир", "Первое расхождение зафиксировано. Теперь нужно выяснить, где в 1975 году жил отряд «Искра», и найти дополнительные материалы.", "story", 1400);
-      queueStoryMessage("Лёша", "Начните со справки о лагере и плана 1975 года в электронном каталоге. После реконструкции номера корпусов изменились.");
+      briefing("Командир", "Первое расхождение зафиксировано. Теперь нужно выяснить, где в 1975 году жил отряд «Искра», и найти дополнительные материалы.", "story", 1400);
+      briefing("Лёша", "Начните со справки о лагере и плана 1975 года в электронном каталоге. После реконструкции номера корпусов изменились.");
       return;
     }
 
-    queueStoryMessage("Система", "Обучение завершено. Поисковая группа ждёт указаний.", "sys", 2400);
-    queueStoryMessage("Командир", "Материалы «Искры» требуют проверки. Сопоставляйте записи и продолжайте обследование лагеря. Честь, готовность, умение.", "story", 2800);
-    queueStoryMessage("Даша", "Штаб, мы у ворот «Ракеты». Тут корпуса 1, 2 и 4 — третьего нет. Где в 1975 году жила «Искра»?", "story", 3600);
-    queueStoryMessage("Лёша", "Наверняка корпуса перенумеровали. Поищите в электронном каталоге справку о лагере и план 1975 года.", "", 4200);
+    briefing("Система", "Обучение завершено. Поисковая группа ждёт указаний.", "sys", 2400);
+    briefing("Командир", "Материалы «Искры» требуют проверки. Сопоставляйте записи и продолжайте обследование лагеря. Честь, готовность, умение.", "story", 2800);
+    briefing("Даша", "Штаб, мы у ворот «Ракеты». Тут корпуса 1, 2 и 4 — третьего нет. Где в 1975 году жила «Искра»?", "story", 3600);
+    briefing("Лёша", "Наверняка корпуса перенумеровали. Поищите в электронном каталоге справку о лагере и план 1975 года.", "", 4200);
   };
 
   const grantPlace = (id: string): void => {

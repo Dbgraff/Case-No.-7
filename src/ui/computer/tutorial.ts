@@ -25,10 +25,6 @@ export function bindTutorial(): void {
   const skipBtn = document.getElementById("btnSkipTutorial") as HTMLButtonElement;
   let shown: TutorialStep | null = null;
 
-  /**
-   * Counts the "open the archive" step if the player is on the archive tab.
-   * @returns {void}
-   */
   const checkArchive = (): void => {
     if (getActiveSpace() === "computer" && getActiveTab() === "archive") {
       completeTutorialStep("archive");
@@ -37,7 +33,10 @@ export function bindTutorial(): void {
 
   onSpaceChange((space) => {
     if (space === "computer") completeTutorialStep("computer");
-    if (space === "computer") { checkArchive(); checkIntegratedArchive(); }
+    if (space === "computer") {
+      checkArchive();
+      checkIntegratedArchive();
+    }
   });
   onTabChange(checkArchive);
 
@@ -62,7 +61,6 @@ export function bindTutorial(): void {
   onSpaceChange(checkIntegratedArchive);
   skipBtn.addEventListener("click", skipTutorial);
 
-  /** @param {Readonly<GameState>} s - Current game state. */
   const render = (s: Readonly<GameState>): void => {
     const step = s.tutorialStep;
     skipBtn.hidden = !isTutorialRunning(step);
@@ -71,7 +69,7 @@ export function bindTutorial(): void {
     shown = step;
 
     if (isActiveStep(step)) {
-      queueStoryMessage("Система", TUTORIAL_HINTS[step], "sys", 550);
+      queueStoryMessage("Система", TUTORIAL_HINTS[step], "sys", 550, true);
     } else if (step === "done" && prev !== null && isActiveStep(prev)) {
       queueStoryMessage("Система", TUTORIAL_DONE_TEXT, "sys", 550);
     } else if (step === "skipped" && prev !== null && isTutorialRunning(prev)) {

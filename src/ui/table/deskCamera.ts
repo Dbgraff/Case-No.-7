@@ -18,6 +18,33 @@ export interface DeskCamera {
   isOpen(): boolean;
 }
 
+export function showDeskPreview(
+  host: HTMLElement,
+  target: HTMLElement,
+  preview: HTMLElement,
+): HTMLElement {
+  const source = target.getBoundingClientRect();
+  host.appendChild(preview);
+
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const destination = preview.getBoundingClientRect();
+    if (destination.width && destination.height) {
+      preview.animate(
+        [
+          {
+            transform: `translate(${source.left - destination.left}px, ${source.top - destination.top}px)
+              scale(${source.width / destination.width}, ${source.height / destination.height})`,
+          },
+          { transform: "none" },
+        ],
+        { duration: 540, easing: "cubic-bezier(.22, 1, .36, 1)" },
+      );
+    }
+  }
+
+  return preview;
+}
+
 let instance: DeskCamera | null = null;
 
 /**
@@ -117,7 +144,7 @@ export function initDeskCamera(): DeskCamera {
     workspace!.classList.add("desk-camera-focused");
     setTransform(x, y, DESK_CAMERA_ZOOM);
     scrollArea.scrollTop = 0;
-    if (options.prologueHost) back.focus({ preventScroll: true });
+    back.focus({ preventScroll: true });
   }
 
   function close(): void {
@@ -147,7 +174,7 @@ export function initDeskCamera(): DeskCamera {
   back.addEventListener("click", close);
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && opened &&
-        !workspace!.querySelector(".case7-prologue.chat-popup-open")) {
+        !workspace!.querySelector(".case7-prologue.chat-popup-open:not(.prologue-chat-only)")) {
       close();
     }
   });

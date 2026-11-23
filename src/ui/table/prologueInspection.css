@@ -1,9 +1,10 @@
-#app.integrated-desktop .case7-prologue {
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) {
   --prologue-clipboard-width: min(470px, 46%);
   --prologue-clipboard-right: 2.6%;
 }
 
-.case7-prologue::before {
+.case7-prologue::before,
+#app.integrated-desktop #spaceTable::after {
   position: absolute;
   z-index: 98;
   inset: 0;
@@ -14,12 +15,14 @@
   transition: opacity 250ms ease;
 }
 
-.case7-prologue:has(> .prologue-reading-paper)::before {
+.case7-prologue:has(> .prologue-reading-paper)::before,
+#app.integrated-desktop #spaceTable:has(> .desk-find-preview)::after {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .case7-prologue::before {
+  .case7-prologue::before,
+  #app.integrated-desktop #spaceTable::after {
     transition: none;
   }
 }
@@ -59,7 +62,7 @@
   pointer-events: none;
 }
 
-.case7-prologue > .prologue-reading-paper {
+:is(.case7-prologue > .prologue-reading-paper, :where(#spaceTable) > .desk-find-preview) {
   position: absolute;
   z-index: 99;
   top: 9%;
@@ -81,11 +84,11 @@
   box-shadow: 2px 3px #917d60, 8px 14px 24px #0008;
 }
 
-.case7-prologue > .prologue-reading-paper .prologue-paper-title {
+:is(.case7-prologue > .prologue-reading-paper, :where(#spaceTable) > .desk-find-preview) .prologue-paper-title {
   font-size: clamp(18px, 2.4vw, 29px);
 }
 
-#app.integrated-desktop .case7-prologue > .desk-camera-board:has(.prologue-clipboard-notes) {
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) > .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect)) {
   --clipboard-edge: clamp(10px, 1.2vw, 16px);
   --clipboard-clip-width: min(48%, 162px);
 
@@ -107,14 +110,14 @@
     8px 15px 26px #0009;
 }
 
-.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::before,
-.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::after {
+:is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))::before,
+:is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))::after {
   position: absolute;
   content: "";
   pointer-events: none;
 }
 
-.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::before {
+:is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))::before {
   inset: 34px var(--clipboard-edge) var(--clipboard-edge);
   background:
     linear-gradient(115deg, #fff7dc44, #fff9e97a 44%, #c0935833),
@@ -127,7 +130,7 @@
     2px 5px 7px #301d1366;
 }
 
-.case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)::after {
+:is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))::after {
   z-index: 2;
   top: 4px;
   left: 50%;
@@ -138,14 +141,14 @@
   filter: drop-shadow(1px 3px 2px #26160bd9);
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))
 :is(.desk-camera-board-header, .desk-camera-board-body) {
   position: relative;
   z-index: 1;
   padding-inline: clamp(12px, 1.5vw, 22px);
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))
 .desk-camera-board-header {
   display: flex;
   justify-content: flex-end;
@@ -154,12 +157,12 @@
   background: transparent;
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))
 .desk-camera-board-body {
   padding-block: 7px 13px;
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))
 .desk-camera-board-title {
   margin: 0 0 10px;
   padding-bottom: 8px;
@@ -196,7 +199,7 @@
   gap: 6px;
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))
 .desk-camera-back,
 .prologue-clipboard-actions button {
   padding: 6px 9px;
@@ -208,21 +211,21 @@
   cursor: pointer;
 }
 
-#app.integrated-desktop .case7-prologue .desk-camera-board:has(.prologue-clipboard-notes)
+#app.integrated-desktop :is(.case7-prologue, #spaceTable) .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect))
 .desk-camera-back:hover,
 .prologue-clipboard-actions button:hover {
   background: #ba8b4738;
 }
 
 @media (max-width: 700px) {
-  .case7-prologue > .prologue-reading-paper {
+  :is(.case7-prologue > .prologue-reading-paper, :where(#spaceTable) > .desk-find-preview) {
     top: 66px;
     right: 0;
     width: min(92%, 320px);
     max-height: max(155px, calc(54dvh - 132px));
   }
 
-  #app.integrated-desktop .case7-prologue > .desk-camera-board:has(.prologue-clipboard-notes) {
+  #app.integrated-desktop :is(.case7-prologue, #spaceTable) > .desk-camera-board:has(:is(.prologue-clipboard-notes, #deskInspect)) {
     --clipboard-clip-width: min(44%, 132px);
 
     top: max(230px, calc(54dvh - 54px));

@@ -1,6 +1,7 @@
 
 import "./restorationDesk.css";
-import { getDeskCamera } from "./deskCamera";
+import "./findInspection.css";
+import { getDeskCamera, showDeskPreview } from "./deskCamera";
 
 import {
   FIND_STATUS_LABELS,
@@ -47,6 +48,7 @@ function renderItem(
   item.className =
     `desk-item type-${f.type}` + (selected ? " sel" : "");
 
+  item.dataset.findId = f.id;
   item.style.setProperty("--tilt", `${tilt(f.id)}deg`);
   item.setAttribute("aria-pressed", String(selected));
 
@@ -71,33 +73,50 @@ function renderItem(
   return item;
 }
 
+function renderPreview(host: HTMLElement, find: Find): void {
+  const restoration = RESTORATIONS[find.id];
+  const result = find.status === "done" ? restoration?.result : undefined;
+
+  const label = document.createElement("span");
+  label.className = "prologue-paper-label";
+  label.textContent = FIND_TYPE_LABELS[find.type];
+
+  const rule = document.createElement("span");
+  rule.className = "prologue-paper-rule";
+  rule.setAttribute("aria-hidden", "true");
+
+  const title = document.createElement("h3");
+  title.className = "prologue-paper-title";
+  title.textContent = result?.title ?? find.title;
+
+  const text = document.createElement("p");
+  text.className = "prologue-paper-body";
+  text.textContent = result ? find.outcome?.text ?? result.text : find.description;
+
+  host.dataset.findType = find.type;
+  host.setAttribute("aria-label", title.textContent);
+  host.replaceChildren(label, rule, title, text);
+
+  if (find.type === "tape") {
+    const cassette = document.createElement("div");
+    cassette.className = "desk-find-cassette";
+    cassette.setAttribute("aria-hidden", "true");
+    text.before(cassette);
+  }
+}
+
 function renderInspect(
   host: HTMLElement,
   f: Find | undefined,
 ): void {
   host.replaceChildren();
 
-  if (!f) {
-    const hint = document.createElement("p");
-    hint.className = "muted";
-    hint.textContent =
-      "Выберите предмет на коврике, чтобы осмотреть его.";
-    host.appendChild(hint);
-    return;
-  }
-
-  const title = document.createElement("h3");
-  title.textContent = f.title;
+  if (!f) return;
 
   const tag = document.createElement("div");
   tag.className = "find-tag";
-  tag.textContent =
-    `${FIND_TYPE_LABELS[f.type]} · ${FIND_STATUS_LABELS[f.status]}`;
-
-  const desc = document.createElement("p");
-  desc.textContent = f.description;
-
-  host.append(tag, title, desc);
+  tag.textContent = FIND_STATUS_LABELS[f.status];
+  host.append(tag);
 
   const place =
     PLACES.find((p) => p.id === f.placeId)?.name ?? f.placeId;
@@ -134,21 +153,7 @@ function renderInspect(
     return;
   }
 
-  if (f.status === "done") {
-    const result = document.createElement("div");
-    result.className = "desk-result";
-
-    const heading = document.createElement("b");
-    heading.textContent = restoration.result.title;
-
-    const text = document.createElement("p");
-    text.textContent =
-      f.outcome?.text ?? restoration.result.text;
-
-    result.append(heading, text);
-    host.appendChild(result);
-    return;
-  }
+  if (f.status === "done") return;
 
   const btn = document.createElement("button");
   btn.type = "button";
@@ -175,60 +180,80 @@ function renderInspect(
 }
 
 export function bindFinds(): void {
+  const desk = document.getElementById("spaceTable");
   const surface = document.getElementById("deskItems");
   const inspect = document.getElementById("deskInspect");
 
-  if (!surface || !inspect) {
-    console.error(
-      "Не найдены элементы реставрационного стола",
-    );
+  if (!desk || !surface || !inspect) {
+    console.error("Не найдены элементы реставрационного стола");
     return;
   }
 
   let selectedId: string | null = null;
   let lastState: Readonly<GameState> | null = null;
+  let preview: HTMLElement | null = null;
 
-  const render = (): void => {
+  function openFind(findId: string): void {
+    const camera = getDeskCamera();
+    if (!camera) return;
+
+    preview?.remove();
+    preview = null;
+    selectedId = findId;
+    completeTutorialStep("selectItem", findId);
+    render();
+
+    const target = surface!.querySelector<HTMLElement>(".desk-item.sel");
+    const find = lastState?.finds.find(item => item.id === findId);
+    if (!target || !find) return;
+
+    preview = document.createElement("article");
+    preview.className = "desk-find-preview prologue-reading-paper";
+    renderPreview(preview, find);
+    showDeskPreview(desk!, target, preview);
+
+    camera.open({
+      target,
+      title: find.title,
+      content: inspect!,
+      onClose: () => {
+        preview?.remove();
+        preview = null;
+        selectedId = null;
+        render();
+        Array.from(surface!.querySelectorAll<HTMLButtonElement>("[data-find-id]"))
+          .find(button => button.dataset.findId === findId)?.focus({ preventScroll: true });
+      },
+    });
+  }
+
+  function render(): void {
     if (!lastState) return;
 
     const finds = lastState.finds;
-    surface.replaceChildren();
+    const selected = finds.find(find => find.id === selectedId);
+    if (preview && !selected) {
+      getDeskCamera()?.close();
+      return;
+    }
+
+    surface!.replaceChildren();
 
     if (finds.length === 0) {
       const empty = document.createElement("p");
       empty.className = "desk-empty";
       empty.textContent =
         "Стол пуст. Отправьте группу на выход и завершите день — находки появятся здесь.";
-      surface.appendChild(empty);
+      surface!.appendChild(empty);
     }
 
-    for (const f of finds) {
-      surface.appendChild(
-        renderItem(f, f.id === selectedId, () => {
-          selectedId = f.id;
-          completeTutorialStep("selectItem", f.id);
-          render();
-          const selectedNode = Array.from(
-            surface.querySelectorAll<HTMLElement>(".desk-item")
-          ).find(node => node.classList.contains("sel"));
-          const camera = getDeskCamera();
-          if (selectedNode && camera) {
-            camera.open({
-              target: selectedNode,
-              title: f.title,
-              // Move the live inspection panel into the overlay; keep handlers.
-              content: inspect,
-            });
-          }
-        }),
-      );
+    for (const find of finds) {
+      surface!.appendChild(renderItem(find, find.id === selectedId, () => openFind(find.id)));
     }
 
-    renderInspect(
-      inspect,
-      finds.find((f) => f.id === selectedId),
-    );
-  };
+    renderInspect(inspect!, selected);
+    if (preview && selected) renderPreview(preview, selected);
+  }
 
   subscribe((state) => {
     lastState = state;

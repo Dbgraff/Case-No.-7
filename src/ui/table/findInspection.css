@@ -1,0 +1,91 @@
+#app.integrated-desktop .id-table-workspace #spaceTable::before {
+  background-image: url("/prologue-workbench.png");
+  background-size: cover;
+  transform: none;
+}
+
+#app.integrated-desktop #spaceTable .desk-surface {
+  left: 14%;
+  top: 26%;
+  width: 68%;
+  height: 61%;
+  padding: 10px;
+  overflow-x: hidden;
+  transform: none;
+}
+
+#app.integrated-desktop #spaceTable #deskInspect:not(.desk-camera-board #deskInspect) {
+  display: none;
+}
+
+#app.integrated-desktop #spaceTable:has(> .desk-find-preview) .desk-item.sel {
+  opacity: 0;
+}
+
+#app.integrated-desktop #spaceTable > .desk-find-preview {
+  z-index: 100;
+}
+
+#app.integrated-desktop #spaceTable > .desk-camera-board:has(#deskInspect) {
+  z-index: 101;
+}
+
+#app.integrated-desktop .id-table-workspace:has(.desk-find-preview) .prologue-chat-only {
+  display: none;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board #deskInspect .btn {
+  border-color: #514c30;
+  background: #4a4a2f;
+  color: #fff2d7;
+  box-shadow: none;
+}
+
+#app.integrated-desktop #spaceTable .desk-camera-board #deskInspect .btn:hover {
+  background: #5c5938;
+}
+
+#spaceTable .desk-find-preview .prologue-paper-title {
+  margin: 0;
+}
+
+#spaceTable .desk-find-preview .prologue-paper-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#spaceTable .desk-find-preview:is([data-find-type="document"], [data-find-type="letter"]) .prologue-paper-body {
+  font-family: "Courier New", monospace;
+}
+
+#spaceTable .desk-find-preview[data-find-type="note"] {
+  background:
+    repeating-linear-gradient(0deg, #f5e7c67a 0 22px, #6e859459 22px 23px),
+    #e9d9b8 url("/archive-paper-texture.png") center / cover;
+}
+
+#spaceTable .desk-find-preview[data-find-type="note"] .prologue-paper-body {
+  color: #263d52;
+  font-family: "Segoe Print", Georgia, serif;
+  font-style: italic;
+}
+
+.desk-find-cassette {
+  aspect-ratio: 1.58;
+  margin-top: 18px;
+  border: 2px solid #191915;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 31% 56%, #292820 0 5%, #c8b992 6% 8%, #5e5745 9% 12%, transparent 13%),
+    radial-gradient(circle at 69% 56%, #292820 0 5%, #c8b992 6% 8%, #5e5745 9% 12%, transparent 13%),
+    linear-gradient(#2f2c24 13%, #b49b6b 14% 44%, #25241f 45% 77%, #494337 78%);
+  box-shadow: inset 0 0 0 4px #4b453a, 3px 5px 8px #0006;
+}
+
+@media (max-width: 700px) {
+  #app.integrated-desktop #spaceTable .desk-surface {
+    left: 5%;
+    width: 90%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

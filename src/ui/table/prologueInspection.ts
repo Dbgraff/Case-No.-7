@@ -1,6 +1,7 @@
 import "./prologueInspection.css";
 import "./prologueDocuments.css";
 import "./prologueHints.css";
+import { showDeskPreview } from "./deskCamera";
 
 type DocumentDetails = {
   title: string;
@@ -15,7 +16,6 @@ export function showProloguePaper(
   title: string,
   markup: string,
 ): HTMLElement {
-  const source = button.getBoundingClientRect();
   host.querySelector(".prologue-reading-paper")?.remove();
 
   const paper = document.createElement("article");
@@ -23,23 +23,8 @@ export function showProloguePaper(
   paper.dataset.document = button.dataset.document ?? "";
   paper.setAttribute("aria-label", title);
   paper.innerHTML = markup;
-  host.appendChild(paper);
 
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const destination = paper.getBoundingClientRect();
-    paper.animate(
-      [
-        {
-          transform: `translate(${source.left - destination.left}px, ${source.top - destination.top}px)
-            scale(${source.width / destination.width}, ${source.height / destination.height})`,
-        },
-        { transform: "none" },
-      ],
-      { duration: 540, easing: "cubic-bezier(.22, 1, .36, 1)" },
-    );
-  }
-
-  return paper;
+  return showDeskPreview(host, button, paper);
 }
 
 export function createPrologueClipboard(

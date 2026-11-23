@@ -1,3 +1,48 @@
+#app.integrated-desktop[data-space="table"] .system-menubar {
+  display: none;
+}
+
+#app.integrated-desktop[data-space="table"] .id-table-workspace {
+  padding-block-start: 0;
+  overflow-x: hidden;
+}
+
+#app.integrated-desktop .case7-prologue.prologue-chat-only > .desk-camera-board[inert] {
+  display: none;
+}
+
+#app.integrated-desktop[data-space="table"] .id-table-content {
+  min-height: 100dvh;
+}
+
+#app.integrated-desktop[data-space="table"] #spaceTable {
+  min-height: max(680px, 100dvh);
+}
+
+#app.integrated-desktop[data-space="table"]
+:is(.workspace-switch, .case7-prologue.prologue-chat-only) {
+  inset-block-start: 14px;
+}
+
+#app.integrated-desktop[data-space="table"] .case7-prologue:not(.prologue-chat-only) {
+  inset-block-start: 0;
+  min-height: 100%;
+}
+
+#app.integrated-desktop[data-space="table"] .prologue-desk-scene {
+  min-height: max(650px, 100dvh);
+}
+
+#app.integrated-desktop[data-space="table"] .prologue-conclusion {
+  top: 50dvh;
+}
+
+@media (max-width: 1050px) {
+  #app.integrated-desktop[data-space="table"] .case7-prologue.prologue-chat-pinned .prologue-chat {
+    top: max(70px, calc(100dvh - 16px - var(--prologue-chat-height)));
+  }
+}
+
 /* Shared camera: the desk image and desk objects move; UI remains fixed. */
 #spaceTable,
 .id-table-workspace {
